@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chris Proctor</title>
+  <meta name="description" content="UCSB Baseball Stats and Real Estate" />
+  <style>
+    :root {
+      --ucsb-blue: #003660;
+      --ucsb-gold: #FEBC11;
+      --ink: #1a1a1a;
+      --muted: #5a5a5a;
+      --bg: #fafafa;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      color: var(--ink);
+      background: var(--bg);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    header {
+      padding: 48px 24px 24px;
+      text-align: center;
+    }
+    header h1 {
+      margin: 0 0 8px;
+      font-size: clamp(2rem, 5vw, 3.25rem);
+      letter-spacing: -0.02em;
+    }
+    header p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 1.05rem;
+    }
+    main {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 32px 24px 64px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 24px;
+      max-width: 880px;
+      width: 100%;
+    }
+    .tile {
+      display: block;
+      padding: 56px 32px;
+      background: white;
+      border: 1px solid #e5e7eb;
+      border-radius: 16px;
+      text-decoration: none;
+      color: var(--ink);
+      text-align: center;
+      transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+    }
+    .tile:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 28px rgba(0,0,0,0.08);
+      border-color: var(--ucsb-gold);
+    }
+    .tile .icon {
+      font-size: 3rem;
+      margin-bottom: 16px;
+      line-height: 1;
+    }
+    .tile h2 {
+      margin: 0 0 8px;
+      font-size: 1.5rem;
+      color: var(--ucsb-blue);
+    }
+    .tile p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+    footer {
+      text-align: center;
+      padding: 16px 24px 24px;
+      color: var(--muted);
+      font-size: 0.85rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Chris Proctor</h1>
+    <p>UCSB Baseball Stats and Real Estate</p>
+  </header>
+  <main>
+    <div class="grid">
+      <a class="tile" href="/UCSBbaseballstats/">
+        <div class="icon">⚾</div>
+        <h2>UCSB Baseball Stats</h2>
+        <p>Live player stats for UCSB baseball.</p>
+      </a>
+      <a class="tile" href="/realestate/">
+        <div class="icon">🏠</div>
+        <h2>Real Estate</h2>
+        <p>Browse properties in Santa Barbara, Isla Vista, San Luis Obispo, and Honolulu.</p>
+      </a>
+    </div>
+  </main>
+  <footer>© <span id="year"></span> chrisproctor.org</footer>
+  <script>
+    document.getElementById('year').textContent = new Date().getFullYear();
+  </script>
+</body>
+</html>

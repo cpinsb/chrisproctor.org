@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UCSB Baseball 2026 — Stats</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #003660;
+    --gold: #FEBC11;
+    --gold-dark: #C89500;
+    --white: #FFFFFF;
+    --off-white: #F5F3EE;
+    --light-gray: #E8E4DC;
+    --mid-gray: #A8A09A;
+    --dark: #1A1A1A;
+    --row-alt: rgba(0,54,96,0.04);
+    --row-hover: rgba(254,188,17,0.12);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--off-white);
+    color: var(--dark);
+    min-height: 100vh;
+  }
+  /* HEADER */
+  header {
+    background: var(--navy);
+    padding: 0;
+    position: relative;
+    overflow: hidden;
+  }
+  .header-stripe {
+    height: 6px;
+    background: var(--gold);
+  }
+  .header-inner {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 18px 32px 20px;
+  }
+  .home-link {
+    position: absolute;
+    top: 14px;
+    left: 18px;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    color: rgba(255,255,255,0.6);
+    text-decoration: none;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 4px 8px;
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 4px;
+    transition: all 0.15s;
+  }
+  .home-link:hover {
+    color: var(--gold);
+    border-color: var(--gold);
+  }
+  .logo-mark {
+    width: 58px;
+    height: 58px;
+    background: var(--gold);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-family: 'Bebas Neue', cursive;
+    font-size: 26px;
+    color: var(--navy);
+    letter-spacing: 1px;
+    box-shadow: 0 0 0 4px rgba(254,188,17,0.25);
+  }
+  .header-text { flex: 1; }
+  .header-text h1 {
+    font-family: 'Bebas Neue', cursive;
+    font-size: 2rem;
+    color: var(--white);
+    letter-spacing: 2px;
+    line-height: 1;
+  }
+  .header-text h1 span {
+    color: var(--gold);
+  }
+  .header-meta {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    color: rgba(255,255,255,0.5);
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-top: 4px;
+  }
+  .record-badge {
+    font-family: 'Bebas Neue', cursive;
+    font-size: 1.4rem;
+    color: var(--gold);
+    text-align: right;
+    line-height: 1;
+  }
+  .record-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    color: rgba(255,255,255,0.4);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  /* NAV TABS */
+  .tab-nav {
+    background: var(--navy);
+    display: flex;
+    padding: 0 32px;
+    border-bottom: 3px solid var(--gold);
+    gap: 4px;
+  }
+  .tab-btn {
+    font-family: 'Bebas Neue', cursive;
+    font-size: 1.05rem;
+    letter-spacing: 2px;
+    padding: 12px 28px 10px;
+    background: transparent;
+    color: rgba(255,255,255,0.45);
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+    border-bottom: 3px solid transparent;
+    margin-bottom: -3px;
+  }
+  .tab-btn:hover { color: rgba(255,255,255,0.8); }
+  .tab-btn.active {
+    color: var(--gold);
+    background: var(--off-white);
+    border-bottom-color: var(--off-white);
+    border-radius: 4px 4px 0 0;
+  }
+  /* MAIN CONTENT */
+  .page {
+    display: none;
+    padding: 28px 32px 48px;
+    animation: fadeIn 0.25s ease;
+  }
+  .page.active { display: block; }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  /* SECTION HEADER */
+  .section-header {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    margin-bottom: 14px;
+  }
+  .section-title {
+    font-family: 'Bebas Neue', cursive;
+    font-size: 1.5rem;
+    color: var(--navy);
+    letter-spacing: 2px;
+  }
+  .section-sub {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.68rem;
+    color: var(--mid-gray);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  /* TABLE WRAPPER */
+  .table-wrap {
+    width: 100%;
+    overflow-x: auto;
+    border-radius: 8px;
+    border: 1.5px solid var(--light-gray);
+    background: var(--white);
+    box-shadow: 0 2px 16px rgba(0,0,0,0.05);
+    margin-bottom: 32px;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.82rem;
+  }
+  thead tr {
+    background: var(--navy);
+  }
+  thead th {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.62rem;
+    font-weight: 500;
+    color: rgba(255,255,255,0.65);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    padding: 10px 10px;
+    text-align: center;
+    white-space: nowrap;
+    border-right: 1px solid rgba(255,255,255,0.07);
+  }
+  thead th.left { text-align: left; }
+  thead th.key-stat { color: var(--gold); }
+  tbody tr {
+    border-bottom: 1px solid var(--light-gray);
+    transition: background 0.15s;
+  }
+  tbody tr:nth-child(even) { background: var(--row-alt); }
+  tbody tr:hover { background: var(--row-hover); }
+  tbody tr.totals-row {
+    background: rgba(0,54,96,0.07) !important;
+    border-top: 2px solid var(--navy);
+  }
+  tbody tr.totals-row td {
+    font-weight: 600;
+    color: var(--navy);
+  }
+  td {
+    padding: 9px 10px;
+    text-align: center;
+    white-space: nowrap;
+    border-right: 1px solid rgba(0,0,0,0.04);
+    font-variant-numeric: tabular-nums;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.78rem;
+  }
+  td.left { text-align: left; font-family: 'DM Sans', sans-serif; }
+  .num { color: var(--mid-gray); font-size: 0.7rem; margin-right: 2px; }
+  .player-name {
+    font-weight: 600;
+    color: var(--dark);
+    font-size: 0.82rem;
+  }
+  .highlight { color: var(--navy); font-weight: 600; }
+  .gold-stat { color: var(--gold-dark); font-weight: 700; }
+  .pill {
+    display: inline-block;
+    padding: 2px 7px;
+    border-radius: 20px;
+    font-size: 0.68rem;
+    font-weight: 600;
+    font-family: 'DM Mono', monospace;
+  }
+  .pill-green { background: #E6F4EA; color: #2D7A3A; }
+  .pill-blue { background: #E8F0FE; color: #1A56B0; }
+  .pill-red { background: #FDE8E8; color: #C0392B; }
+  .pill-gold { background: #FFF8E0; color: #856B00; }
+  /* STATS SUMMARY STRIP */
+  .stats-strip {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+  .stat-card {
+    background: var(--white);
+    border: 1.5px solid var(--light-gray);
+    border-radius: 8px;
+    padding: 14px 16px;
+    text-align: center;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+  }
+  .stat-card .val {
+    font-family: 'Bebas Neue', cursive;
+    font-size: 1.8rem;
+    color: var(--navy);
+    line-height: 1;
+  }
+  .stat-card .val.gold { color: var(--gold-dark); }
+  .stat-card .lbl {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.6rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--mid-gray);
+    margin-top: 3px;
+  }
+  footer {
+    background: var(--navy);
+    padding: 14px 32px;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.62rem;
+    color: rgba(255,255,255,0.35);
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+    letter-spacing: 0.5px;
+  }
+  footer a { color: var(--gold); opacity: 0.7; text-decoration: none; }
+  footer a:hover { opacity: 1; text-decoration: underline; }
+  footer span.legend { color: var(--gold); opacity: 0.7; }
+  @media (max-width: 640px) {
+    .header-inner { padding: 30px 16px 14px; }
+    .home-link { top: 8px; left: 12px; }
+    .page { padding: 16px 12px 40px; }
+    .tab-nav { padding: 0 12px; }
+    .tab-btn { padding: 12px 16px 10px; font-size: 0.9rem; }
+    footer { padding: 12px 16px; flex-direction: column; gap: 4px; }
+  }
+</style>
+</head>
+<body>
+<div class="header-stripe"></div>
+<header>
+  <a href="/" class="home-link">← Home</a>
+  <div class="header-inner">
+    <div class="logo-mark">UC</div>
+    <div class="header-text">
+      <h1>UCSB <span>Gauchos</span> Baseball</h1>
+      <div class="header-meta" id="header-meta">2026 Season · Cumulative Statistics · Big West Conference</div>
+    </div>
+    <div>
+      <div class="record-badge" id="record-badge">27–12</div>
+      <div class="record-label">Overall Record</div>
+    </div>
+  </div>
+</header>
+<nav class="tab-nav">
+  <button class="tab-btn active" data-tab="hitting">⚾ Hitting</button>
+  <button class="tab-btn" data-tab="pitching">🥎 Pitching</button>
+</nav>
+<!-- ═══════════════ HITTING PAGE ═══════════════ -->
+<div id="hitting" class="page active">
+  <div class="stats-strip" id="hitting-strip">
+    <div class="stat-card"><div class="val">.272</div><div class="lbl">Team AVG</div></div>
+    <div class="stat-card"><div class="val">225</div><div class="lbl">Runs Scored</div></div>
+    <div class="stat-card"><div class="val gold">31</div><div class="lbl">Home Runs</div></div>
+    <div class="stat-card"><div class="val">206</div><div class="lbl">RBI</div></div>
+    <div class="stat-card"><div class="val">.782</div><div class="lbl">Team OPS</div></div>
+    <div class="stat-card"><div class="val">33</div><div class="lbl">Stolen Bases</div></div>
+  </div>
+  <div class="section-header">
+    <div class="section-title">Hitting Statistics</div>
+    <div class="section-sub" id="hitting-sub">All Games — Sorted by AB</div>
+  </div>
+  <div class="table-wrap">
+    <table id="hitting-table">
+      <thead>
+        <tr>
+          <th class="left" style="width:180px">#&nbsp;&nbsp;Player</th>
+          <th class="key-stat">AVG</th>
+          <th class="key-stat">OPS</th>
+          <th>GP-GS</th>
+          <th>AB</th>
+          <th>R</th>
+          <th>H</th>
+          <th>2B</th>
+          <th>3B</th>
+          <th>HR</th>
+          <th>RBI</th>
+          <th>TB</th>
+          <th>SLG%</th>
+          <th>BB</th>
+          <th>HBP</th>
+          <th>SO</th>
+          <th>OB%</th>
+          <th>SB-ATT</th>
+        </tr>
+      </thead>
+      <tbody id="hitting-body">
+        <tr>
+          <td class="left"><span class="num">3</span><span class="player-name">Kelly, Rowan</span></td>
+          <td class="highlight">.322</td><td>.871</td><td>39-39</td><td>146</td><td>38</td>
+          <td class="highlight">47</td><td>11</td><td>0</td><td>2</td><td>26</td><td>64</td>
+          <td>.438</td><td>20</td><td>11</td><td>25</td><td>.433</td><td>11-14</td>
+        </tr>
+        <tr>
+          <td class="left"><span class="num">5</span><span class="player-name">Mendez, Jonathan</span></td>
+          <td>.298</td><td>.738</td><td>32-30</td><td>121</td><td>16</td>
+          <td>36</td><td>8</td><td>1</td><td>1</td><td>16</td><td>49</td>
+          <td>.405</td><td>4</td><td>3</td><td>21</td><td>.333</td><td>3-3</td>
+        </tr>
+        <tr>
+          <td class="left"><span class="num">6</span><span class="player-name">Husovsky, Nick</span></td>
+          <td>.274</td><td>.772</td><td>35-32</td><td>124</td><td>18</td>
+          <td>34</td><td>4</td><td>0</td><td>5</td><td class="highlight">24</td><td>53</td>
+          <td>.427</td><td>10</td><td>4</td><td>26</td><td>.345</td><td>0-2</td>
+        </tr>
+        <tr>
+          <td class="left"><span class="num">26</span><span class="player-name">Vasseur, William</span></td>
+          <td>.316</td><td>.788</td><td>28-28</td><td>95</td><td>16</td>
+          <td>30</td><td>6</td><td>0</td><td>1</td><td>15</td><td>39</td>
+          <td>.411</td><td>4</td><td>6</td><td>13</td><td>.377</td><td>1-2</td>
+        </tr>
+        <tr>
+          <td class="left"><span class="num">19</span><span class="player-name">Kosciusko, Cole</span></td>
+          <td>.261</td><td>.705</td><td>36-30</td><td>111</td><td>13</td>
+          <td>29</td><td>7</td><td>1</td><td>1</td><td>19</td><td>41</td>
+          <td>.369</td><td>12</td><td>1</td><td>26</td><td>.336</td><td>1-5</td>
+        </tr>
+        <tr>
+          <td class="left"><span class="num">41</span><span class="player-name">Karliner, Noah</span></td>
+          <td>.228</td><td>.777</td><td>36-27</td><td>101</td><td>18</td>
+          <td>23</td><td>3</td><td>0</td><td>5</td><td>15</td><td>41</td>
+          <td>.406</td><td class="highlight">21</td><td>2</td><td>38</td><td>.371</td><td>1-1</td>
+        </tr>
+        <tr>
+          <td class="left"><span class="num">31</span><span class="player-name">Esquer, Xavier</span></td>
+          <td>.221</td><td>.721</td><td>31-24</td><td>86</td><td>13</td>
+          <td>19</td><td>7</td><td>2</td><td>2</td><td>17</td><td>36</td>
+          <td>.419</td><td>7</td><td>3</td><td>26</td><td>.302</td><td>0-1</td>
+        </tr>
+        <tr>
+          <td class="left"><span class="num">16</span><span class="player-name">Nunez, Corey</span></td>
+          <td>.291</td><td>.820</td><td>32-22</td><td>86</td><td>19</td>
+          <td>25</td><td>3</td><td>2</td><td>2</td><td>7</td><td>38</td>
+          <td>.442</td><td>8</td><td>4</td><td>16</td><td>.378</td><td>4-5</td>
+        </tr>
+        <tr>
+          <td class="left"><span class="num">12</span><span class="player-name">Vargas, Nate</span></td>
+          <td>.241</td><td>.874</td><td>28-24</td><td>83</td><td>16</td>
+          <td>20</td><td>5</td><td>0</td><td class="gold-stat">6</td><td>19</td><td>43</td>
+          <td class="highlight">.518</td><td>11</td><td>5</td><td>25</td><td>.356</td><td>0-0</td>
+        </tr>
+        <tr>
+          <td class="left"><span class="num">1</span><span class="player-name">Beazizo, Colin</span></td>
+          <td class="gold-stat">.325</td><td class="gold-stat">.930</td><td>29-22</td><td>77</td><td>16</td>
+          <td>25</td><td>2</td><td>2</td><td>2</td><td>13</td><td>37</td>
+          <td>.481</td><td>8</td><td>11</td><td>25</td><td class="gold-stat">.449</td><td>2-3</td>
+        </tr>
+        <tr>
+          <td class="left"><span class="num">25</span><span class="player-name">Goldstein, Cade</span></td>
+          <td>.258</td><td>.812</td><td>18-17</td><td>62</td><td>11</td>
+          <td>16</td><td>2</td><td>0</td><td>2</td><td>10</td><td>24</td>
+          <td>.387</td><td>13</td><td>5</td><td>17</td><td>.425</td><td>3-6</td>
+        </tr>
+        <tr>
+          <td class="left"><span class="num">10</span><span class="player-name">Barrett, Liam</span></td>
+          <td>.320</td><td>.937</td><td>15-13</td><td>50</td><td>12</td>
+          <td>16</td><td>4</td><td>0</td><td>2</td><td>6</td><td>26</td>
+          <td>.520</td><td>9</td><td>0</td><td>9</td><td>.417</td><td>3-3</td>
+        </tr>
+        <tr>
+          <td class="left"><span class="num">13</span><span class="player-name">Libed, Nico</span></td>
+          <td>.200</td><td>.593</td><td>19-15</td><td>50</td><td>4</td>
+          <td>10</td><td>3</td><td>0</td><td>0</td><td>8</td><td>13</td>
+          <td>.260</td><td>9</td><td>1</td><td>9</td><td>.333</td><td>3-3</td>
+        </tr>
+        <tr>
+          <td class="left"><span class="num">35</span><span class="player-name">Stagg, Max</span></td>
+          <td>.196</td><td>.523</td><td>29-13</td><td>46</td><td>7</td>
+          <td>9</td><td>0</td><td>0</td><td>0</td><td>4</td><td>9</td>
+          <td>.196</td><td>7</td><td>2</td><td>18</td><td>.327</td><td>0-1</td>
+        </tr>
+        <tr>
+          <td class="left"><span class="num">46</span><span class="player-name">Severns, Ryan</span></td>
+          <td>.226</td><td>.682</td><td>14-10</td><td>31</td><td>5</td>
+          <td>7</td><td>3</td><td>0</td><td>0</td><td>4</td><td>10</td>
+          <td>.323</td><td>3</td><td>4</td><td>13</td><td>.359</td><td>1-1</td>
+        </tr>
+        <tr>
+          <td class="left"><span class="num">9</span><span class="player-name">Haferkamp, Jack</span></td>
+          <td>.083</td><td>.237</td><td>12-2</td><td>12</td><td>1</td>
+          <td>1</td><td>0</td><td>0</td><td>0</td><td>1</td><td>1</td>
+          <td>.083</td><td>1</td><td>0</td><td>5</td><td>.154</td><td>0-0</td>
+        </tr>
+        <tr>
+          <td class="left"><span class="num">39</span><span class="player-name">Namie, Mitch</span></td>
+          <td>.273</td><td>.697</td><td>7-3</td><td>11</td><td>1</td>
+          <td>3</td><td>1</td><td>0</td><td>0</td><td>1</td><td>4</td>
+          <td>.364</td><td>1</td><td>0</td><td>2</td><td>.333</td><td>0-0</td>
+        </tr>
+        <tr>
+          <td class="left"><span class="num">50</span><span class="player-name">Marian, Jordan</span></td>
+          <td class="gold-stat">.500</td><td class="gold-stat">1.500</td><td>8-0</td><td>4</td><td>1</td>
+          <td>2</td><td>1</td><td>0</td><td>0</td><td>1</td><td>3</td>
+          <td>.750</td><td>4</td><td>0</td><td>1</td><td>.750</td><td>0-0</td>
+        </tr>
+        <tr class="totals-row">
+          <td class="left" style="font-family:'DM Mono',monospace; font-size:0.7rem; letter-spacing:1px; text-transform:uppercase;">TEAM TOTALS</td>
+          <td>.272</td><td>.782</td><td>39-39</td><td>1296</td><td>225</td>
+          <td>352</td><td>70</td><td>8</td><td>31</td><td>206</td><td>531</td>
+          <td>.410</td><td>152</td><td>62</td><td>315</td><td>.372</td><td>33-50</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+<!-- ═══════════════ PITCHING PAGE ═══════════════ -->
+<div id="pitching" class="page">
+  <div class="stats-strip" id="pitching-strip">
+    <div class="stat-card"><div class="val gold">2.97</div><div class="lbl">Team ERA</div></div>
+    <div class="stat-card"><div class="val">1.16</div><div class="lbl">Team WHIP</div></div>
+    <div class="stat-card"><div class="val">394</div><div class="lbl">Strikeouts</div></div>
+    <div class="stat-card"><div class="val">13</div><div class="lbl">Saves</div></div>
+    <div class="stat-card"><div class="val">.214</div><div class="lbl">Opp. AVG</div></div>
+    <div class="stat-card"><div class="val">346</div><div class="lbl">Innings Pitched</div></div>
+  </div>
+  <div class="section-header">
+    <div class="section-title">Pitching Statistics</div>
+    <div class="section-sub" id="pitching-sub">All Games — Sorted by IP</div>
+  </div>
+  <div class="table-wrap">
+    <table id="pitching-table">
+      <thead>
+        <tr>
+          <th class="left" style="width:190px">#&nbsp;&nbsp;Player</th>
+          <th class="key-stat">ERA</th>
+          <th class="key-stat">WHIP</th>
+          <th>W-L</th>
+          <th>APP-GS</th>
+          <th>SV</th>
+          <th>IP</th>
+          <th>H</th>
+          <th>R</th>
+          <th>ER</th>
+          <th>BB</th>
+          <th class="key-stat">SO</th>
+          <th>HR</th>
+          <th>B/AVG</th>
+          <th>HBP</th>
+          <th>WP</th>
+        </tr>
+      </thead>
+      <tbody id="pitching-body">
+        <tr>
+          <td class="left"><span class="num">2</span><span class="player-name">Flora, Jackson</span></td>
+          <td class="gold-stat">0.78</td><td>.88</td><td>8-0</td><td>11-11</td><td>0</td>
+          <td class="highlight">69.1</td><td>36</td><td>8</td><td>6</td><td>25</td>
+          <td class="gold-stat">88</td><td>1</td><td class="gold-stat">.150</td><td>6</td><td>4</td>
+        </tr>
+        <tr>
+          <td class="left"><span class="num">17</span><span class="player-name">Montgomery, Kellan</span></td>
+          <td>3.11</td><td>1.15</td><td>6-2</td><td>10-10</td><td>0</td>
+          <td class="highlight">55.0</td><td>44</td><td>19</td><td>19</td><td>19</td>
+          <td>46</td><td>8</td><td>.227</td><td>5</td><td>3</td>
+        </tr>
+        <tr>
+          <td class="left"><span class="num">20</span><span class="player-name">Aceves, Nathan</span></td>
+          <td>4.02</td><td>1.23</td><td>2-2</td><td>10-10</td><td>0</td>
+          <td>47.0</td><td>39</td><td>23</td><td>21</td><td>19</td>
+          <td>53</td><td>2</td><td>.225</td><td>9</td><td>0</td>
+        </tr>
+        <tr>
+          <td class="left"><span class="num">22</span><span class="player-name">Hoover, Chase</span></td>
+          <td>4.39</td><td>1.43</td><td>0-0</td><td>15-0</td><td class="highlight">3</td>
+          <td>26.2</td><td>27</td><td>15</td><td>13</td><td>11</td>
+          <td>36</td><td>2</td><td>.260</td><td>2</td><td>4</td>
+        </tr>
+        <tr>
+          <td class="left"><span class="num">28</span><span class="player-name">Olivas, Raymond</span></td>
+          <td class="highlight">2.42</td><td>1.12</td><td>1-1</td><td>21-0</td><td>2</td>
+          <td>26.0</td><td>25</td><td>9</td><td>7</td><td>4</td>
+          <td>21</td><td>2</td><td>.260</td><td>0</td><td>1</td>
+        </tr>
+        <tr>
+          <td class="left"><span class="num">7</span><span class="player-name">Tryba, Cole</span></td>
+          <td class="highlight">2.96</td><td>.90</td><td>3-3</td><td>9-1</td><td>2</td>
+          <td>24.1</td><td>17</td><td>11</td><td>8</td><td>5</td>
+          <td>32</td><td>2</td><td>.189</td><td>6</td><td>3</td>
+        </tr>
+        <tr>
+          <td class="left"><span class="num">27</span><span class="player-name">Jannicelli, Josh</span></td>
+          <td>3.86</td><td>1.20</td><td>2-1</td><td>10-4</td><td>0</td>
+          <td>23.1</td><td>15</td><td>12</td><td>10</td><td>13</td>
+          <td>35</td><td>3</td><td>.181</td><td>2</td><td>2</td>
+        </tr>
+        <tr>
+          <td class="left"><span class="num">45</span><span class="player-name">Krodel, AJ</span></td>
+          <td>6.45</td><td>1.88</td><td>3-2</td><td>15-0</td><td class="gold-stat">4</td>
+          <td>22.1</td><td>30</td><td>17</td><td>16</td><td>12</td>
+          <td>24</td><td>4</td><td>.323</td><td>1</td><td>1</td>
+        </tr>
+        <tr>
+          <td class="left"><span class="num">24</span><span class="player-name">Froling, Van</span></td>
+          <td class="highlight">2.79</td><td>1.03</td><td>1-1</td><td>11-0</td><td>2</td>
+          <td>19.1</td><td>12</td><td>8</td><td>6</td><td>8</td>
+          <td>26</td><td>0</td><td class="highlight">.171</td><td>1</td><td>3</td>
+        </tr>
+        <tr>
+          <td class="left"><span class="num">55</span><span class="player-name">Jackson, Donovann</span></td>
+          <td>3.09</td><td>1.37</td><td>1-0</td><td>6-0</td><td>0</td>
+          <td>11.2</td><td>10</td><td>4</td><td>4</td><td>6</td>
+          <td>15</td><td>1</td><td>.238</td><td>0</td><td>1</td>
+        </tr>
+        <tr>
+          <td class="left"><span class="num">32</span><span class="player-name">Proskey, Calvin</span></td>
+          <td class="gold-stat">0.00</td><td>.88</td><td>0-0</td><td>3-3</td><td>0</td>
+          <td>8.0</td><td>5</td><td>0</td><td>0</td><td>2</td>
+          <td>5</td><td>0</td><td>.185</td><td>2</td><td>0</td>
+        </tr>
+        <tr>
+          <td class="left"><span class="num">34</span><span class="player-name">Gonzales, Stunner</span></td>
+          <td class="highlight">2.45</td><td>1.09</td><td>0-0</td><td>7-0</td><td>0</td>
+          <td>7.1</td><td>5</td><td>2</td><td>2</td><td>3</td>
+          <td>6</td><td>1</td><td>.217</td><td>0</td><td>1</td>
+        </tr>
+        <tr>
+          <td class="left"><span class="num">15</span><span class="player-name">Peterson, Nic</span></td>
+          <td>6.00</td><td>2.67</td><td>0-0</td><td>4-0</td><td>0</td>
+          <td>3.0</td><td>3</td><td>2</td><td>2</td><td>5</td>
+          <td>5</td><td>0</td><td>.300</td><td>1</td><td>1</td>
+        </tr>
+        <tr>
+          <td class="left"><span class="num">14</span><span class="player-name">Aber, Hudson</span></td>
+          <td class="gold-stat">0.00</td><td>1.00</td><td>0-0</td><td>2-0</td><td>0</td>
+          <td>2.0</td><td>1</td><td>0</td><td>0</td><td>1</td>
+          <td>1</td><td>0</td><td>.143</td><td>0</td><td>0</td>
+        </tr>
+        <tr>
+          <td class="left"><span class="num">36</span><span class="player-name">Laubach, Kole</span></td>
+          <td class="gold-stat">0.00</td><td>.00</td><td>0-0</td><td>1-0</td><td>0</td>
+          <td>0.2</td><td>0</td><td>0</td><td>0</td><td>0</td>
+          <td>1</td><td>0</td><td>.000</td><td>0</td><td>1</td>
+        </tr>
+        <tr class="totals-row">
+          <td class="left" style="font-family:'DM Mono',monospace; font-size:0.7rem; letter-spacing:1px; text-transform:uppercase;">TEAM TOTALS</td>
+          <td>2.97</td><td>1.16</td><td>27-12</td><td>135-39</td><td>13</td>
+          <td>346.0</td><td>269</td><td>130</td><td>114</td><td>133</td>
+          <td>394</td><td>26</td><td>.214</td><td>35</td><td>25</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+<footer>
+  <div>Source: <a href="https://ucsbgauchos.com/sports/baseball/stats" target="_blank" rel="noopener">ucsbgauchos.com</a> · <span id="footer-freshness">stats as of April 25, 2026</span></div>
+  <div>Key: <span class="legend">Gold</span> = team leader &nbsp;|&nbsp; <span class="legend">Bold Navy</span> = top performer</div>
+</footer>
+<script>
+  // ────── Tab switching ──────
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const tab = btn.dataset.tab;
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById(tab).classList.add('active');
+      btn.classList.add('active');
+    });
+  });
+
+  // ────── Live data loader ──────
+  // Loads UCSBbaseballstats/stats.json (committed nightly by the GitHub Action).
+  // If found, replaces the demo table contents and stat cards with real numbers.
+  // If not found, the static fallback above remains visible.
+
+  const HITTING_COLS = ['AVG','OPS','GP-GS','AB','R','H','2B','3B','HR','RBI','TB','SLG%','BB','HBP','SO','OB%','SB-ATT'];
+  const PITCHING_COLS = ['ERA','WHIP','W-L','APP-GS','SV','IP','H','R','ER','BB','SO','HR','B/AVG','HBP','WP'];
+
+  // Aliases for header-name matching across slightly different source formats.
+  const ALIAS = {
+    'AVG':['AVG','BA','AVG.'], 'OPS':['OPS'], 'GP-GS':['GP-GS','GP/GS','GP'], 'AB':['AB'],
+    'R':['R','RUNS'], 'H':['H','HITS'], '2B':['2B','DOUBLES'], '3B':['3B','TRIPLES'],
+    'HR':['HR','HOMERUNS','HOME RUNS'], 'RBI':['RBI'], 'TB':['TB'], 'SLG%':['SLG%','SLG','SLG PCT'],
+    'BB':['BB','WALKS'], 'HBP':['HBP'], 'SO':['SO','K','STRIKEOUTS'], 'OB%':['OB%','OBP','OBP%'],
+    'SB-ATT':['SB-ATT','SB-A','SB ATT','SB','SB-CS'],
+    'ERA':['ERA'], 'WHIP':['WHIP'], 'W-L':['W-L','W/L','RECORD'], 'APP-GS':['APP-GS','APP/GS','APP'],
+    'SV':['SV','SAVES'], 'IP':['IP'], 'ER':['ER'], 'B/AVG':['B/AVG','BA','OPP AVG','BAA'],
+    'WP':['WP']
+  };
+
+  function norm(s){ return String(s||'').toUpperCase().replace(/[\s.]/g,''); }
+
+  function buildIndex(headers, wanted) {
+    const map = {};
+    const normed = headers.map(norm);
+    wanted.forEach(col => {
+      const candidates = (ALIAS[col] || [col]).map(norm);
+      for (const c of candidates) {
+        const i = normed.indexOf(c);
+        if (i !== -1) { map[col] = i; break; }
+      }
+    });
+    return map;
+  }
+
+  function findPlayerCol(headers) {
+    // Find the index of the column that holds the player name
+    const candidates = ['PLAYER','NAME','LASTFIRST','LAST,FIRST'];
+    const normed = headers.map(norm);
+    for (const c of candidates) {
+      const i = normed.indexOf(c);
+      if (i !== -1) return i;
+    }
+    // Fallback: first non-numeric-looking column
+    return 1;
+  }
+
+  function findNumberCol(headers) {
+    const normed = headers.map(norm);
+    for (const c of ['#','NO','NUM','JERSEY']) {
+      const i = normed.indexOf(c);
+      if (i !== -1) return i;
+    }
+    return -1;
+  }
+
+  function isTotalsRow(cells) {
+    const first = (cells[0] || '').toLowerCase();
+    return first.includes('total') || first.includes('team');
+  }
+
+  function escapeHtml(s) {
+    return String(s ?? '').replace(/[&<>"']/g, c =>
+      ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+
+  function renderRow(cells, headers, wantedCols, opts = {}) {
+    const map = buildIndex(headers, wantedCols);
+    const playerIdx = findPlayerCol(headers);
+    const numIdx = findNumberCol(headers);
+    const num = numIdx >= 0 ? (cells[numIdx] || '') : '';
+    const name = cells[playerIdx] || '';
+    const totals = opts.totals;
+
+    let firstCell;
+    if (totals) {
+      firstCell = `<td class="left" style="font-family:'DM Mono',monospace; font-size:0.7rem; letter-spacing:1px; text-transform:uppercase;">TEAM TOTALS</td>`;
+    } else {
+      firstCell = `<td class="left">${num ? `<span class="num">${escapeHtml(num)}</span>` : ''}<span class="player-name">${escapeHtml(name)}</span></td>`;
+    }
+
+    const dataCells = wantedCols.map(col => {
+      const i = map[col];
+      const v = i !== undefined ? cells[i] : '';
+      return `<td>${escapeHtml(v ?? '')}</td>`;
+    }).join('');
+
+    return `<tr${totals ? ' class="totals-row"' : ''}>${firstCell}${dataCells}</tr>`;
+  }
+
+  function renderBody(table, wantedCols, bodyId) {
+    const tbody = document.getElementById(bodyId);
+    if (!tbody) return null;
+
+    const playerRows = [];
+    let totalsRow = null;
+    for (const cells of table.rows) {
+      if (isTotalsRow(cells)) totalsRow = cells;
+      else playerRows.push(cells);
+    }
+
+    const html = playerRows.map(c => renderRow(c, table.headers, wantedCols)).join('') +
+      (totalsRow ? renderRow(totalsRow, table.headers, wantedCols, { totals: true }) : '');
+    tbody.innerHTML = html;
+    return totalsRow;
+  }
+
+  function pickCellByHeader(headers, cells, wantedAliases) {
+    const normed = headers.map(norm);
+    for (const a of wantedAliases) {
+      const i = normed.indexOf(norm(a));
+      if (i !== -1) return cells[i];
+    }
+    return null;
+  }
+
+  function setIfPresent(stripId, label, value) {
+    if (value == null || value === '') return;
+    const strip = document.getElementById(stripId);
+    if (!strip) return;
+    const cards = strip.querySelectorAll('.stat-card');
+    for (const card of cards) {
+      const lbl = card.querySelector('.lbl');
+      if (lbl && lbl.textContent.trim().toLowerCase() === label.toLowerCase()) {
+        const val = card.querySelector('.val');
+        if (val) val.textContent = value;
+        return;
+      }
+    }
+  }
+
+  function updateHittingStrip(headers, totalsRow) {
+    if (!totalsRow) return;
+    setIfPresent('hitting-strip', 'Team AVG',     pickCellByHeader(headers, totalsRow, ['AVG','BA']));
+    setIfPresent('hitting-strip', 'Runs Scored',  pickCellByHeader(headers, totalsRow, ['R']));
+    setIfPresent('hitting-strip', 'Home Runs',    pickCellByHeader(headers, totalsRow, ['HR']));
+    setIfPresent('hitting-strip', 'RBI',          pickCellByHeader(headers, totalsRow, ['RBI']));
+    setIfPresent('hitting-strip', 'Team OPS',     pickCellByHeader(headers, totalsRow, ['OPS']));
+    const sb = pickCellByHeader(headers, totalsRow, ['SB-ATT','SB-A','SB']);
+    if (sb) {
+      const justSb = String(sb).split(/[-/]/)[0].trim();
+      setIfPresent('hitting-strip', 'Stolen Bases', justSb);
+    }
+  }
+
+  function updatePitchingStrip(headers, totalsRow) {
+    if (!totalsRow) return;
+    setIfPresent('pitching-strip', 'Team ERA',         pickCellByHeader(headers, totalsRow, ['ERA']));
+    setIfPresent('pitching-strip', 'Team WHIP',        pickCellByHeader(headers, totalsRow, ['WHIP']));
+    setIfPresent('pitching-strip', 'Strikeouts',       pickCellByHeader(headers, totalsRow, ['SO','K']));
+    setIfPresent('pitching-strip', 'Saves',            pickCellByHeader(headers, totalsRow, ['SV']));
+    setIfPresent('pitching-strip', 'Opp. AVG',         pickCellByHeader(headers, totalsRow, ['B/AVG','BAA','BA']));
+    setIfPresent('pitching-strip', 'Innings Pitched',  pickCellByHeader(headers, totalsRow, ['IP']));
+
+    // Update overall record from W-L totals
+    const wl = pickCellByHeader(headers, totalsRow, ['W-L','RECORD']);
+    if (wl) document.getElementById('record-badge').textContent = String(wl).replace('-','–');
+  }
+
+  function classifyTable(t) {
+    const h = (t.heading || '').toLowerCase();
+    const headersJoined = (t.headers || []).join(' ').toLowerCase();
+    if (h.includes('hit') || /\bavg\b|\bops\b|\brbi\b/.test(headersJoined)) return 'hitting';
+    if (h.includes('pitch') || /\bera\b|\bwhip\b|\bip\b/.test(headersJoined)) return 'pitching';
+    return null;
+  }
+
+  async function loadLiveStats() {
+    try {
+      const res = await fetch('stats.json?cb=' + Date.now(), { cache: 'no-store' });
+      if (!res.ok) return;
+      const data = await res.json();
+      if (!data || !Array.isArray(data.tables)) return;
+
+      let hittingTable, pitchingTable;
+      for (const t of data.tables) {
+        const kind = classifyTable(t);
+        if (kind === 'hitting' && !hittingTable) hittingTable = t;
+        else if (kind === 'pitching' && !pitchingTable) pitchingTable = t;
+      }
+
+      if (hittingTable) {
+        const totals = renderBody(hittingTable, HITTING_COLS, 'hitting-body');
+        updateHittingStrip(hittingTable.headers, totals);
+      }
+      if (pitchingTable) {
+        const totals = renderBody(pitchingTable, PITCHING_COLS, 'pitching-body');
+        updatePitchingStrip(pitchingTable.headers, totals);
+      }
+
+      if (data.scraped_at) {
+        const d = new Date(data.scraped_at);
+        if (!isNaN(d)) {
+          const pretty = d.toLocaleString(undefined, {
+            year: 'numeric', month: 'short', day: 'numeric'
+          });
+          document.getElementById('footer-freshness').textContent = `stats as of ${pretty}`;
+        }
+      }
+      if (data.season) {
+        document.getElementById('header-meta').textContent =
+          `${data.season} Season · Cumulative Statistics · Big West Conference`;
+      }
+    } catch (e) {
+      // Silent fallback to static demo data already in the DOM
+      console.warn('Live stats unavailable, showing demo data.', e);
+    }
+  }
+
+  loadLiveStats();
+</script>
+</body>
+</html>

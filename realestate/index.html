@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Real Estate — Chris Proctor</title>
+  <meta name="description" content="Property listings: Santa Barbara, Isla Vista, San Luis Obispo, Honolulu" />
+  <style>
+    :root {
+      --ink: #1a1a1a;
+      --muted: #5a5a5a;
+      --bg: #fafafa;
+      --border: #e5e7eb;
+      --accent: #003660;
+      --gold: #FEBC11;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      color: var(--ink);
+      background: var(--bg);
+    }
+    .topbar {
+      background: var(--accent);
+      color: white;
+      padding: 14px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .topbar a { color: var(--gold); text-decoration: none; font-weight: 600; }
+    .topbar .title { font-size: 1.1rem; font-weight: 700; }
+    main { max-width: 1200px; margin: 0 auto; padding: 32px 20px 64px; }
+    h1 {
+      margin: 0 0 4px;
+      color: var(--accent);
+      font-size: clamp(1.8rem, 4vw, 2.5rem);
+      letter-spacing: -0.02em;
+    }
+    .subtitle { color: var(--muted); margin: 0 0 28px; }
+    .controls {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      flex-wrap: wrap;
+      margin-bottom: 24px;
+    }
+    .controls button {
+      padding: 8px 14px;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      background: white;
+      cursor: pointer;
+      font-size: 0.9rem;
+      color: var(--muted);
+      font-weight: 600;
+    }
+    .controls button.active {
+      background: var(--accent);
+      color: white;
+      border-color: var(--accent);
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 24px;
+    }
+    .card {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+    .card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 28px rgba(0,0,0,0.08);
+    }
+    .photo {
+      aspect-ratio: 16 / 10;
+      width: 100%;
+      background-size: cover;
+      background-position: center;
+      background-color: #e5e7eb;
+      position: relative;
+    }
+    .photo .pill {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      background: rgba(0, 54, 96, 0.92);
+      color: white;
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 999px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+    .body { padding: 18px 20px 22px; flex: 1; display: flex; flex-direction: column; }
+    .body h3 {
+      margin: 0 0 4px;
+      font-size: 1.15rem;
+      color: var(--accent);
+    }
+    .city { color: var(--muted); font-size: 0.9rem; margin: 0 0 12px; }
+    .meta {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin-bottom: 12px;
+    }
+    .meta span strong { color: var(--ink); }
+    .desc { font-size: 0.92rem; color: #333; margin: 0 0 14px; line-height: 1.5; flex: 1; }
+    .map-link {
+      display: inline-block;
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+    .map-link:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <span class="title">🏠 Real Estate</span>
+    <a href="/">← Home</a>
+  </div>
+  <main>
+    <h1>Properties</h1>
+    <p class="subtitle">A portfolio of rentals in California and Hawaii.</p>
+
+    <div class="controls" id="filters">
+      <button class="active" data-region="all">All</button>
+      <button data-region="Santa Barbara">Santa Barbara</button>
+      <button data-region="Isla Vista">Isla Vista</button>
+      <button data-region="San Luis Obispo">San Luis Obispo</button>
+      <button data-region="Honolulu">Honolulu</button>
+    </div>
+
+    <div class="grid" id="grid"></div>
+  </main>
+
+  <script>
+    const properties = [
+      {
+        name: "Ladera St Apartments",
+        city: "Santa Barbara",
+        region: "Santa Barbara",
+        state: "CA",
+        description: "Multi-unit apartment building in the heart of Santa Barbara, walking distance to downtown and the beach.",
+        photo: "https://images.unsplash.com/photo-1568605114967-8130f3a36994?auto=format&fit=crop&w=1200&q=80",
+        mapQuery: "Ladera St, Santa Barbara, CA"
+      },
+      {
+        name: "Camino Del Sur",
+        city: "Isla Vista",
+        region: "Isla Vista",
+        state: "CA",
+        description: "UCSB student rental near campus on Camino Del Sur. High-demand college town location.",
+        photo: "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&w=1200&q=80",
+        mapQuery: "Camino Del Sur, Isla Vista, CA"
+      },
+      {
+        name: "Sueno",
+        city: "Isla Vista",
+        region: "Isla Vista",
+        state: "CA",
+        description: "Sueno Road property steps from UCSB. Classic Isla Vista student housing.",
+        photo: "https://images.unsplash.com/photo-1570129477492-45c003edd2be?auto=format&fit=crop&w=1200&q=80",
+        mapQuery: "Sueno Rd, Isla Vista, CA"
+      },
+      {
+        name: "Sabado Tarde",
+        city: "Isla Vista",
+        region: "Isla Vista",
+        state: "CA",
+        description: "Sabado Tarde rental in the heart of UCSB's student neighborhood, blocks from campus and the bluffs.",
+        photo: "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=1200&q=80",
+        mapQuery: "Sabado Tarde Rd, Isla Vista, CA"
+      },
+      {
+        name: "Casa St Apartments",
+        city: "San Luis Obispo",
+        region: "San Luis Obispo",
+        state: "CA",
+        description: "Multi-unit apartment building in San Luis Obispo, serving Cal Poly students and locals.",
+        photo: "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=1200&q=80",
+        mapQuery: "Casa St, San Luis Obispo, CA"
+      },
+      {
+        name: "Ilikai Marina",
+        city: "Honolulu",
+        region: "Honolulu",
+        state: "HI",
+        description: "Condo at the Ilikai Marina overlooking the Ala Wai Harbor and Waikiki Beach.",
+        photo: "https://images.unsplash.com/photo-1582268611958-ebfd161ef9cf?auto=format&fit=crop&w=1200&q=80",
+        mapQuery: "Ilikai Marina, Honolulu, HI"
+      }
+    ];
+
+    const grid = document.getElementById('grid');
+    const filters = document.getElementById('filters');
+
+    function render(region = 'all') {
+      const list = region === 'all' ? properties : properties.filter(p => p.region === region);
+      grid.innerHTML = list.map(p => `
+        <article class="card">
+          <div class="photo" style="background-image:url('${p.photo}')">
+            <span class="pill">${p.region}</span>
+          </div>
+          <div class="body">
+            <h3>${p.name}</h3>
+            <p class="city">${p.city}, ${p.state}</p>
+            <p class="desc">${p.description}</p>
+            <a class="map-link" target="_blank" rel="noopener"
+               href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(p.mapQuery)}">
+              View on Google Maps →
+            </a>
+          </div>
+        </article>
+      `).join('');
+    }
+
+    filters.addEventListener('click', (e) => {
+      const btn = e.target.closest('button');
+      if (!btn) return;
+      filters.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      render(btn.dataset.region);
+    });
+
+    render();
+  </script>
+</body>
+</html>

@@ -402,19 +402,28 @@
     .record-badge { color: #003660 !important; }
     .record-label { color: #666 !important; }
     .record-divider { background: #ccc !important; }
-    .page { display: block !important; padding: 16px 0; }
-    .section-title { color: #003660 !important; }
-    .table-wrap { border: 1px solid #ccc; box-shadow: none; page-break-inside: avoid; margin-bottom: 24px; }
+    .page { display: block !important; padding: 8px 16px; }
+    .section-header { margin-bottom: 8px; }
+    .section-title { color: #003660 !important; font-size: 1.2rem; }
+    .section-sub { color: #666 !important; font-size: 0.65rem; }
+    .leaders-section { margin-bottom: 12px; padding: 8px 12px !important; }
+    .leaders-title { font-size: 0.75rem !important; margin-bottom: 6px; }
+    .leaders-scroll { gap: 6px; padding-bottom: 2px; }
+    .leader-card { padding: 6px 10px !important; min-width: 100px; font-size: 0.7rem; }
+    .table-wrap { border: 1px solid #ccc; box-shadow: none; page-break-inside: avoid; margin-bottom: 12px; }
+    table { font-size: 0.75rem; }
     thead tr { background: #003660 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-    thead th { color: white !important; }
+    thead th { color: white !important; padding: 6px 6px !important; font-size: 0.6rem; }
     thead th.key-stat { color: #FEBC11 !important; }
-    tbody tr:nth-child(even) { background: #f5f5f5 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    tbody tr { border-bottom: 0.5px solid #ddd; }
+    tbody td { padding: 5px 6px !important; }
+    tbody tr:nth-child(even) { background: #f9f9f9 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
     tbody tr.totals-row { background: #e8edf2 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
     .gold-stat { color: #856B00 !important; }
     .highlight { color: #003660 !important; }
     a[href]:after { content: none !important; }
-    #pitching { page-break-before: always; margin-top: 20px; }
-    .section-sub { color: #666 !important; }
+    #pitching { page-break-before: always; margin-top: 0; padding-top: 8px; }
+    td.left { font-size: 0.73rem; }
   }
   @media (max-width: 640px) {
     .header-inner { padding: 30px 16px 14px; flex-wrap: wrap; }

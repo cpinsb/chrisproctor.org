@@ -89,6 +89,81 @@
       color: var(--muted);
       font-size: 0.95rem;
     }
+    .contact-section {
+      background: white;
+      padding: 48px 24px;
+      margin-top: 32px;
+      border-top: 2px solid var(--ucsb-blue);
+    }
+    .contact-section h2 {
+      margin: 0 0 8px;
+      font-size: 1.8rem;
+      color: var(--ucsb-blue);
+      text-align: center;
+      font-weight: 700;
+    }
+    .contact-section p {
+      text-align: center;
+      color: var(--muted);
+      margin: 0 0 28px;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .contact-form {
+      max-width: 500px;
+      margin: 0 auto;
+    }
+    .form-group {
+      margin-bottom: 20px;
+    }
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: var(--ink);
+      font-size: 0.95rem;
+    }
+    .form-group input,
+    .form-group textarea {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1.5px solid #e5e7eb;
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 1rem;
+      color: var(--ink);
+      transition: border-color 0.2s;
+    }
+    .form-group input:focus,
+    .form-group textarea:focus {
+      outline: none;
+      border-color: var(--ucsb-blue);
+      box-shadow: 0 0 0 3px rgba(0, 54, 96, 0.1);
+    }
+    .form-group textarea {
+      resize: vertical;
+      min-height: 120px;
+    }
+    .submit-btn {
+      width: 100%;
+      padding: 12px 24px;
+      background: var(--ucsb-blue);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.15s;
+    }
+    .submit-btn:hover {
+      background: #002a4a;
+      transform: translateY(-2px);
+    }
+    .submit-btn:active {
+      transform: translateY(0);
+    }
     footer {
       text-align: center;
       padding: 16px 24px 24px;
@@ -116,6 +191,25 @@
       </a>
     </div>
   </main>
+  <section class="contact-section">
+    <h2>Get In Touch</h2>
+    <p>Have a question about a property or want to discuss the stats? Send me a message.</p>
+    <form class="contact-form" action="https://formspree.io/f/xenqarq" method="POST">
+      <div class="form-group">
+        <label for="name">Name</label>
+        <input type="text" id="name" name="name" required>
+      </div>
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input type="email" id="email" name="email" required>
+      </div>
+      <div class="form-group">
+        <label for="message">Message</label>
+        <textarea id="message" name="message" required></textarea>
+      </div>
+      <button type="submit" class="submit-btn">Send Message</button>
+    </form>
+  </section>
   <footer>© <span id="year"></span> chrisproctor.org</footer>
   <script>
     document.getElementById('year').textContent = new Date().getFullYear();

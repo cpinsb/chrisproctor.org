@@ -24,18 +24,24 @@
       flex-direction: column;
     }
     header {
-      padding: 48px 24px 24px;
+      padding: 56px 24px 28px;
       text-align: center;
+      border-bottom: 2px solid var(--ucsb-blue);
     }
     header h1 {
-      margin: 0 0 8px;
-      font-size: clamp(2rem, 5vw, 3.25rem);
-      letter-spacing: -0.02em;
+      margin: 0 0 12px;
+      font-size: clamp(2.2rem, 5vw, 3.5rem);
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      color: var(--ucsb-blue);
     }
     header p {
       margin: 0;
-      color: var(--muted);
-      font-size: 1.05rem;
+      color: var(--ucsb-gold);
+      font-size: 1.1rem;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
     }
     main {
       flex: 1;
@@ -94,14 +100,14 @@
 <body>
   <header>
     <h1>Chris Proctor</h1>
-    <p>UCSB Baseball Stats and Real Estate</p>
+    <p>Real Estate</p>
   </header>
   <main>
     <div class="grid">
       <a class="tile" href="/realestate/">
         <div class="icon">🏠</div>
         <h2>Real Estate</h2>
-        <p>Browse properties in Santa Barbara, Isla Vista, San Luis Obispo, and Honolulu.</p>
+        <p>Browse properties in Santa Barbara, Isla Vista, San Luis Obispo, Mammoth Lakes, and Honolulu.</p>
       </a>
       <a class="tile" href="/UCSBbaseballstats/">
         <div class="icon">⚾</div>

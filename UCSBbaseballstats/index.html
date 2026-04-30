@@ -386,8 +386,9 @@
   /* PRINT STYLES */
   @media print {
     body { background: white; }
-    .header-stripe, .home-link, .tab-nav, .leaders-section,
+    .header-stripe, .home-link, .tab-nav,
     .stats-strip, footer, .print-btn { display: none !important; }
+    .leaders-section { display: block !important; page-break-inside: avoid; }
     header {
       background: white !important;
       color: black !important;

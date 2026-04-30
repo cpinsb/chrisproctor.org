@@ -95,19 +95,34 @@
     text-transform: uppercase;
     margin-top: 4px;
   }
+  .record-stack {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .record-item {
+    text-align: center;
+    min-width: 50px;
+  }
+  .record-divider {
+    width: 1px;
+    height: 36px;
+    background: rgba(255,255,255,0.15);
+  }
   .record-badge {
     font-family: 'Bebas Neue', cursive;
     font-size: 1.4rem;
     color: var(--gold);
-    text-align: right;
     line-height: 1;
   }
   .record-label {
     font-family: 'DM Mono', monospace;
-    font-size: 0.65rem;
+    font-size: 0.6rem;
     color: rgba(255,255,255,0.4);
     text-transform: uppercase;
     letter-spacing: 1px;
+    margin-top: 4px;
+    white-space: nowrap;
   }
   /* NAV TABS */
   .tab-nav {
@@ -290,9 +305,123 @@
   footer a { color: var(--gold); opacity: 0.7; text-decoration: none; }
   footer a:hover { opacity: 1; text-decoration: underline; }
   footer span.legend { color: var(--gold); opacity: 0.7; }
+  /* STATISTICAL LEADERS */
+  .leaders-section {
+    background: linear-gradient(135deg, var(--navy) 0%, #004a8c 100%);
+    border-radius: 10px;
+    padding: 14px 18px;
+    margin-bottom: 20px;
+    border: 1.5px solid var(--gold);
+    display: none;
+  }
+  .leaders-title {
+    font-family: 'Bebas Neue', cursive;
+    font-size: 0.82rem;
+    color: var(--gold);
+    letter-spacing: 3px;
+    margin-bottom: 10px;
+  }
+  .leaders-scroll {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+    scrollbar-width: none;
+  }
+  .leaders-scroll::-webkit-scrollbar { display: none; }
+  .leader-card {
+    flex-shrink: 0;
+    background: rgba(255,255,255,0.07);
+    border: 1px solid rgba(254,188,17,0.35);
+    border-radius: 8px;
+    padding: 10px 14px;
+    min-width: 130px;
+  }
+  .leader-stat-name {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.58rem;
+    color: rgba(254,188,17,0.85);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 4px;
+  }
+  .leader-player-name {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: white;
+    margin-bottom: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .leader-value {
+    font-family: 'Bebas Neue', cursive;
+    font-size: 1.3rem;
+    color: var(--gold);
+    line-height: 1;
+  }
+  /* PRINT BUTTON */
+  .print-btn {
+    margin-left: auto;
+    margin-right: 8px;
+    align-self: center;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 6px 14px;
+    background: transparent;
+    color: rgba(255,255,255,0.65);
+    border: 1px solid rgba(255,255,255,0.25);
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.15s;
+    flex-shrink: 0;
+  }
+  .print-btn:hover {
+    color: var(--gold);
+    border-color: var(--gold);
+  }
+  /* PRINT STYLES */
+  @media print {
+    body { background: white; }
+    .header-stripe, .home-link, .tab-nav, .leaders-section,
+    .stats-strip, footer, .print-btn { display: none !important; }
+    header {
+      background: white !important;
+      color: black !important;
+      border-bottom: 2px solid #003660;
+      padding-bottom: 10px;
+    }
+    .logo-mark { background: #003660 !important; }
+    .header-text h1 { color: #003660 !important; }
+    .header-text h1 span { color: #003660 !important; }
+    .header-meta { color: #333 !important; }
+    .record-badge { color: #003660 !important; }
+    .record-label { color: #666 !important; }
+    .record-divider { background: #ccc !important; }
+    .page { display: block !important; padding: 16px 0; }
+    .section-title { color: #003660 !important; }
+    .table-wrap { border: 1px solid #ccc; box-shadow: none; page-break-inside: avoid; margin-bottom: 24px; }
+    thead tr { background: #003660 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    thead th { color: white !important; }
+    thead th.key-stat { color: #FEBC11 !important; }
+    tbody tr:nth-child(even) { background: #f5f5f5 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    tbody tr.totals-row { background: #e8edf2 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .gold-stat { color: #856B00 !important; }
+    .highlight { color: #003660 !important; }
+    a[href]:after { content: none !important; }
+    #pitching { page-break-before: always; margin-top: 20px; }
+    .section-sub { color: #666 !important; }
+  }
   @media (max-width: 640px) {
-    .header-inner { padding: 30px 16px 14px; }
+    .header-inner { padding: 30px 16px 14px; flex-wrap: wrap; }
     .home-link { top: 8px; left: 12px; }
+    .record-stack { gap: 10px; margin-top: 6px; }
+    .record-badge { font-size: 1.2rem; }
+    .record-label { font-size: 0.55rem; }
+    .record-divider { height: 28px; }
     .page { padding: 16px 12px 40px; }
     .tab-nav { padding: 0 12px; }
     .tab-btn { padding: 12px 16px 10px; font-size: 0.9rem; }
@@ -310,18 +439,35 @@
       <h1>UCSB <span>Gauchos</span> Baseball</h1>
       <div class="header-meta" id="header-meta">2026 Season · Cumulative Statistics · Big West Conference</div>
     </div>
-    <div>
-      <div class="record-badge" id="record-badge">27–12</div>
-      <div class="record-label">Overall Record</div>
+    <div class="record-stack">
+      <div class="record-item">
+        <div class="record-badge" id="record-overall">27–12</div>
+        <div class="record-label">Overall</div>
+      </div>
+      <div class="record-divider"></div>
+      <div class="record-item">
+        <div class="record-badge" id="record-league">8–4</div>
+        <div class="record-label">Big West</div>
+      </div>
+      <div class="record-divider"></div>
+      <div class="record-item">
+        <div class="record-badge" id="record-standing">2nd</div>
+        <div class="record-label">Standing</div>
+      </div>
     </div>
   </div>
 </header>
 <nav class="tab-nav">
   <button class="tab-btn active" data-tab="hitting">⚾ Hitting</button>
   <button class="tab-btn" data-tab="pitching">🥎 Pitching</button>
+  <button class="print-btn" onclick="window.print()">🖨 Print</button>
 </nav>
 <!-- ═══════════════ HITTING PAGE ═══════════════ -->
 <div id="hitting" class="page active">
+  <div id="hitting-leaders" class="leaders-section">
+    <div class="leaders-title">⭐ Team Statistical Leaders</div>
+    <div class="leaders-scroll" id="hitting-leaders-cards"></div>
+  </div>
   <div class="stats-strip" id="hitting-strip">
     <div class="stat-card"><div class="val">.272</div><div class="lbl">Team AVG</div></div>
     <div class="stat-card"><div class="val">225</div><div class="lbl">Runs Scored</div></div>
@@ -479,6 +625,10 @@
 </div>
 <!-- ═══════════════ PITCHING PAGE ═══════════════ -->
 <div id="pitching" class="page">
+  <div id="pitching-leaders" class="leaders-section">
+    <div class="leaders-title">⭐ Team Statistical Leaders</div>
+    <div class="leaders-scroll" id="pitching-leaders-cards"></div>
+  </div>
   <div class="stats-strip" id="pitching-strip">
     <div class="stat-card"><div class="val gold">2.97</div><div class="lbl">Team ERA</div></div>
     <div class="stat-card"><div class="val">1.16</div><div class="lbl">Team WHIP</div></div>
@@ -784,9 +934,24 @@
     setIfPresent('pitching-strip', 'Opp. AVG',         pickCellByHeader(headers, totalsRow, ['B/AVG','BAA','BA']));
     setIfPresent('pitching-strip', 'Innings Pitched',  pickCellByHeader(headers, totalsRow, ['IP']));
 
-    // Update overall record from W-L totals
+    // Update overall record from W-L totals (best fallback if scraper didn't include it)
     const wl = pickCellByHeader(headers, totalsRow, ['W-L','RECORD']);
-    if (wl) document.getElementById('record-badge').textContent = String(wl).replace('-','–');
+    if (wl) document.getElementById('record-overall').textContent = String(wl).replace('-','–');
+  }
+
+  function applyRecordsFromData(data) {
+    // The scraper may add these fields when it can extract them from the team
+    // page or Big West standings. If present, they take priority over what's
+    // computed from the totals row.
+    if (data.record_overall) {
+      document.getElementById('record-overall').textContent = String(data.record_overall).replace('-','–');
+    }
+    if (data.record_league) {
+      document.getElementById('record-league').textContent = String(data.record_league).replace('-','–');
+    }
+    if (data.league_standing) {
+      document.getElementById('record-standing').textContent = String(data.league_standing);
+    }
   }
 
   function classifyTable(t) {
@@ -819,6 +984,10 @@
         const totals = renderBody(pitchingTable, PITCHING_COLS, 'pitching-body');
         updatePitchingStrip(pitchingTable.headers, totals);
       }
+      // Records come from the team page / Big West standings (set by the scraper).
+      applyRecordsFromData(data);
+      // Recompute leaders from newly loaded data
+      refreshLeaders();
 
       if (data.scraped_at) {
         const d = new Date(data.scraped_at);
@@ -839,6 +1008,71 @@
     }
   }
 
+  // ────── Statistical Leaders ──────
+  const HITTING_LEADER_CONFIGS = [
+    { col: 'AVG',  label: 'Batting Average', lower: false, minCol: 'AB', minVal: 50 },
+    { col: 'OPS',  label: 'OPS',             lower: false, minCol: 'AB', minVal: 50 },
+    { col: 'SLG%', label: 'Slugging %',      lower: false, minCol: 'AB', minVal: 50 },
+    { col: 'HR',   label: 'Home Runs',       lower: false },
+    { col: 'RBI',  label: 'RBI',             lower: false },
+    { col: 'OB%',  label: 'On-Base %',       lower: false, minCol: 'AB', minVal: 50 },
+  ];
+  const PITCHING_LEADER_CONFIGS = [
+    { col: 'ERA',  label: 'ERA',        lower: true,  minCol: 'IP', minVal: 10 },
+    { col: 'WHIP', label: 'WHIP',       lower: true,  minCol: 'IP', minVal: 10 },
+    { col: 'SO',   label: 'Strikeouts', lower: false },
+    { col: 'SV',   label: 'Saves',      lower: false },
+  ];
+
+  function computeAndRenderLeaders(tableId, sectionId, cardsId, configs) {
+    const table = document.getElementById(tableId);
+    if (!table) return;
+    const thEls = Array.from(table.querySelectorAll('thead th'));
+    const headers = thEls.map(th => th.textContent.trim());
+    const rows = Array.from(table.querySelectorAll('tbody tr:not(.totals-row)'));
+    const leaders = [];
+    for (const cfg of configs) {
+      const colIdx = headers.indexOf(cfg.col);
+      if (colIdx < 0) continue;
+      let bestName = null, bestValStr = '', bestVal = cfg.lower ? Infinity : -Infinity;
+      for (const row of rows) {
+        const cells = Array.from(row.querySelectorAll('td'));
+        if (!cells.length) continue;
+        if (cfg.minCol) {
+          const minIdx = headers.indexOf(cfg.minCol);
+          if (minIdx >= 0 && parseFloat(cells[minIdx]?.textContent || 0) < cfg.minVal) continue;
+        }
+        const valStr = (cells[colIdx]?.textContent || '').trim();
+        const val = parseFloat(valStr);
+        if (isNaN(val)) continue;
+        if (cfg.lower ? val < bestVal : val > bestVal) {
+          bestVal = val;
+          bestValStr = valStr;
+          const nameEl = row.querySelector('td.left .player-name');
+          bestName = nameEl ? nameEl.textContent.trim() : null;
+        }
+      }
+      if (bestName) leaders.push({ label: cfg.label, name: bestName, value: bestValStr });
+    }
+    const section = document.getElementById(sectionId);
+    const cards = document.getElementById(cardsId);
+    if (!section || !cards || !leaders.length) return;
+    cards.innerHTML = leaders.map(l => `
+      <div class="leader-card">
+        <div class="leader-stat-name">${l.label}</div>
+        <div class="leader-player-name">${l.name}</div>
+        <div class="leader-value">${l.value}</div>
+      </div>`).join('');
+    section.style.display = 'block';
+  }
+
+  function refreshLeaders() {
+    computeAndRenderLeaders('hitting-table', 'hitting-leaders', 'hitting-leaders-cards', HITTING_LEADER_CONFIGS);
+    computeAndRenderLeaders('pitching-table', 'pitching-leaders', 'pitching-leaders-cards', PITCHING_LEADER_CONFIGS);
+  }
+
+  // Compute leaders from static data immediately, then again after live data loads
+  refreshLeaders();
   loadLiveStats();
 </script>
 </body>

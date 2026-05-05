@@ -22,8 +22,8 @@ import time
 from datetime import datetime, timezone
 from pathlib import Path
 
-import requests
 from bs4 import BeautifulSoup
+from playwright.sync_api import sync_playwright
 
 DEFAULT_SEASONS = ["2026", "2025"]
 BASE_URL = "https://ucsbgauchos.com/sports/baseball/stats"
@@ -99,14 +99,18 @@ def extract_tables(html: str) -> list[dict]:
 def scrape_season(season: str) -> dict:
     url = f"{BASE_URL}/{season}"
     max_retries = 3
-    timeout = 60  # Increased from 30 to 60 seconds
 
     for attempt in range(max_retries):
         try:
             print(f"[scrape] GET {url} (attempt {attempt + 1}/{max_retries})", flush=True)
-            resp = requests.get(url, headers=HEADERS, timeout=timeout)
-            resp.raise_for_status()
-            tables = extract_tables(resp.text)
+            with sync_playwright() as p:
+                browser = p.chromium.launch(headless=True, args=["--no-sandbox"])
+                page = browser.new_page(user_agent=HEADERS["User-Agent"])
+                page.goto(url, timeout=60000, wait_until="networkidle")
+                html = page.content()
+                browser.close()
+
+            tables = extract_tables(html)
             print(f"[scrape] season={season} tables={len(tables)}", flush=True)
             return {
                 "season": season,
@@ -114,15 +118,12 @@ def scrape_season(season: str) -> dict:
                 "source_url": url,
                 "tables": tables,
             }
-        except requests.exceptions.Timeout:
-            print(f"[scrape] Timeout on attempt {attempt + 1}, retrying...", flush=True)
+        except Exception as e:
+            print(f"[scrape] Attempt {attempt + 1} failed: {e}", flush=True)
             if attempt < max_retries - 1:
-                time.sleep(2)  # Wait 2 seconds before retrying
+                time.sleep(2)
             else:
                 raise
-        except requests.exceptions.RequestException as e:
-            print(f"[scrape] Request failed: {e}", flush=True)
-            raise
 
 
 def main() -> int:

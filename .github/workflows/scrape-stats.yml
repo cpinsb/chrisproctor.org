@@ -23,7 +23,8 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install requests beautifulsoup4
+          pip install beautifulsoup4 playwright
+          playwright install chromium
 
       - name: Scrape UCSB stats
         env:

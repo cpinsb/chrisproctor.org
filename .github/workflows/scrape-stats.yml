@@ -1,0 +1,39 @@
+name: Scrape UCSB Baseball Stats
+
+on:
+  schedule:
+    # Run every day at 2 AM UTC (10 PM PT)
+    - cron: '0 2 * * *'
+  workflow_dispatch:  # Allow manual trigger
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests beautifulsoup4
+
+      - name: Scrape UCSB stats
+        env:
+          OUTPUT_DIR: UCSBbaseballstats
+        run: |
+          python scripts/scrape_ucsb_stats.py
+
+      - name: Commit and push stats
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add UCSBbaseballstats/stats.json
+          git diff --quiet && git diff --staged --quiet || (git commit -m "Update UCSB baseball stats" && git push)

@@ -996,13 +996,18 @@
   function classifyTable(t) {
     const h = (t.heading || '').toLowerCase();
     const headersJoined = (t.headers || []).join(' ').toLowerCase();
-    // Prioritize "Overall" tables (the cumulative stats, not game-by-game or highs)
+    // Never use game-by-game or highs tables — they don't have player name rows
+    if (h.includes('game by game') || h.includes('game-by-game') ||
+        h.includes('high') || h.includes('streak') ||
+        h.includes('multi') || h.includes('conference')) return null;
+    // Prioritize "Overall" individual cumulative stats tables.
+    // Check pitching BEFORE the avg regex to avoid false match on "B/AVG" header.
     if (h.includes('overall')) {
-      if (h.includes('hit') || /\bavg\b|\bops\b|\brbi\b/.test(headersJoined)) return 'hitting';
-      if (h.includes('pitch') || /\bera\b|\bwhip\b|\bip\b/.test(headersJoined)) return 'pitching';
+      if (h.includes('pitch') || /\bera\b|\bwhip\b/.test(headersJoined)) return 'pitching';
+      if (h.includes('hit') || h.includes('bat') || /\bavg\b|\bops\b|\brbi\b/.test(headersJoined)) return 'hitting';
     }
-    if (h.includes('hit') || /\bavg\b|\bops\b|\brbi\b/.test(headersJoined)) return 'hitting';
-    if (h.includes('pitch') || /\bera\b|\bwhip\b|\bip\b/.test(headersJoined)) return 'pitching';
+    if (h.includes('pitch') || /\bera\b|\bwhip\b/.test(headersJoined)) return 'pitching';
+    if (h.includes('hit') || h.includes('bat') || /\bavg\b|\bops\b|\brbi\b/.test(headersJoined)) return 'hitting';
     return null;
   }
 

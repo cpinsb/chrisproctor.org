@@ -102,57 +102,63 @@ def extract_records(html: str) -> dict:
     records = {}
     text = soup.get_text()
 
-    # Try multiple patterns for overall record
-    # Patterns: "27-12", "27–12", "Overall: 27-12", etc.
-    overall_patterns = [
-        r'Overall\s*[:\-]?\s*(\d+)[–\-](\d+)',
-        r'Record\s*[:\-]?\s*(\d+)[–\-](\d+)',
-        r'(\d+)[–\-](\d+)\s*(?:overall|record)',
-    ]
-    for pattern in overall_patterns:
-        match = re.search(pattern, text, re.IGNORECASE)
-        if match:
-            records['record_overall'] = f"{match.group(1)}-{match.group(2)}"
-            break
+    # Print a snippet around "Baseball Cumulative" to see the actual format
+    if "Baseball Cumulative" in text:
+        idx = text.find("Baseball Cumulative")
+        snippet = text[idx:idx+200]
+        print(f"[scrape] Text around 'Baseball Cumulative': {repr(snippet)}", flush=True)
 
-    # Try multiple patterns for Big West record
-    bw_patterns = [
-        r'Big\s+West\s*[:\-]?\s*(\d+)[–\-](\d+)',
-        r'Conference\s*[:\-]?\s*(\d+)[–\-](\d+)',
-        r'(\d+)[–\-](\d+)\s*(?:big\s+west|conference)',
+    # Look for pattern like (30-15, 16-8) which is (overall, big west)
+    # Be more flexible with whitespace and dash types
+    record_pair_patterns = [
+        r'\((\d+)\s*[-–−]\s*(\d+)\s*,\s*(\d+)\s*[-–−]\s*(\d+)\)',
+        r'\((\d+)-(\d+),\s*(\d+)-(\d+)\)',
+        r'\((\d+)[–\-](\d+)\s*,\s*(\d+)[–\-](\d+)\)',
     ]
-    for pattern in bw_patterns:
-        match = re.search(pattern, text, re.IGNORECASE)
-        if match:
-            records['record_league'] = f"{match.group(1)}-{match.group(2)}"
+
+    for pattern in record_pair_patterns:
+        record_match = re.search(pattern, text)
+        if record_match:
+            overall_w = record_match.group(1)
+            overall_l = record_match.group(2)
+            league_w = record_match.group(3)
+            league_l = record_match.group(4)
+            records['record_overall'] = f"{overall_w}-{overall_l}"
+            records['record_league'] = f"{league_w}-{league_l}"
+            print(f"[scrape] found record pair: overall={overall_w}-{overall_l}, league={league_w}-{league_l}", flush=True)
             break
 
     # Try to find standing (more flexible)
     standing_patterns = [
-        r'(\d+)(?:st|nd|rd|th)\s+(?:place|standing)',
-        r'Standing\s*[:\-]?\s*(\d+)(?:st|nd|rd|th)?',
-        r'Rank\s*[:\-]?\s*(\d+)(?:st|nd|rd|th)?',
+        r'(?:standing|rank|place)[:\s]*(\d+)(?:st|nd|rd|th)?',
+        r'(\d+)(?:st|nd|rd|th)\s+(?:place|standing|in\s+(?:big\s+)?west)',
+        r'Big\s+West[^0-9]*(\d+)(?:st|nd|rd|th)?',
+        r'(?:standings?|ranking)[^0-9]*(\d+)(?:st|nd|rd|th)?',
     ]
     for pattern in standing_patterns:
         match = re.search(pattern, text, re.IGNORECASE)
         if match:
             rank = int(match.group(1))
-            # Proper ordinal suffix
-            if rank % 100 in (11, 12, 13):
-                suffix = 'th'
-            elif rank % 10 == 1:
-                suffix = 'st'
-            elif rank % 10 == 2:
-                suffix = 'nd'
-            elif rank % 10 == 3:
-                suffix = 'rd'
-            else:
-                suffix = 'th'
-            records['league_standing'] = f"{rank}{suffix}"
-            break
+            if 1 <= rank <= 12:  # Big West has ~10-12 teams
+                # Proper ordinal suffix
+                if rank % 100 in (11, 12, 13):
+                    suffix = 'th'
+                elif rank % 10 == 1:
+                    suffix = 'st'
+                elif rank % 10 == 2:
+                    suffix = 'nd'
+                elif rank % 10 == 3:
+                    suffix = 'rd'
+                else:
+                    suffix = 'th'
+                records['league_standing'] = f"{rank}{suffix}"
+                print(f"[scrape] found standing: {rank}{suffix}", flush=True)
+                break
 
     if records:
         print(f"[scrape] extracted records: {records}", flush=True)
+    else:
+        print(f"[scrape] no records found in page text", flush=True)
 
     return records
 
@@ -169,11 +175,25 @@ def scrape_season(season: str) -> dict:
                 page = browser.new_page(user_agent=HEADERS["User-Agent"])
                 page.goto(url, timeout=60000, wait_until="networkidle")
                 html = page.content()
+
+                # Also try to get records from the main team page
+                team_url = f"https://ucsbgauchos.com/sports/baseball/"
+                try:
+                    print(f"[scrape] GET {team_url} for records", flush=True)
+                    page.goto(team_url, timeout=60000, wait_until="networkidle")
+                    team_html = page.content()
+                except Exception as e:
+                    print(f"[scrape] Failed to fetch team page: {e}", flush=True)
+                    team_html = ""
+
                 browser.close()
 
             tables = extract_tables(html)
+            # Try to extract records from stats page first, then team page as fallback
             records = extract_records(html)
-            print(f"[scrape] season={season} tables={len(tables)}", flush=True)
+            if not records and team_html:
+                records = extract_records(team_html)
+            print(f"[scrape] season={season} tables={len(tables)} records={records}", flush=True)
 
             result = {
                 "season": season,

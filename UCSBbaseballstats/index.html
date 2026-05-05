@@ -967,6 +967,11 @@
   function classifyTable(t) {
     const h = (t.heading || '').toLowerCase();
     const headersJoined = (t.headers || []).join(' ').toLowerCase();
+    // Prioritize "Overall" tables (the cumulative stats, not game-by-game or highs)
+    if (h.includes('overall')) {
+      if (h.includes('hit') || /\bavg\b|\bops\b|\brbi\b/.test(headersJoined)) return 'hitting';
+      if (h.includes('pitch') || /\bera\b|\bwhip\b|\bip\b/.test(headersJoined)) return 'pitching';
+    }
     if (h.includes('hit') || /\bavg\b|\bops\b|\brbi\b/.test(headersJoined)) return 'hitting';
     if (h.includes('pitch') || /\bera\b|\bwhip\b|\bip\b/.test(headersJoined)) return 'pitching';
     return null;

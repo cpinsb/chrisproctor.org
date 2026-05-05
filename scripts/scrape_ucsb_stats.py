@@ -18,6 +18,7 @@ import json
 import os
 import re
 import sys
+import time
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -97,17 +98,31 @@ def extract_tables(html: str) -> list[dict]:
 
 def scrape_season(season: str) -> dict:
     url = f"{BASE_URL}/{season}"
-    print(f"[scrape] GET {url}", flush=True)
-    resp = requests.get(url, headers=HEADERS, timeout=30)
-    resp.raise_for_status()
-    tables = extract_tables(resp.text)
-    print(f"[scrape] season={season} tables={len(tables)}", flush=True)
-    return {
-        "season": season,
-        "scraped_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
-        "source_url": url,
-        "tables": tables,
-    }
+    max_retries = 3
+    timeout = 60  # Increased from 30 to 60 seconds
+
+    for attempt in range(max_retries):
+        try:
+            print(f"[scrape] GET {url} (attempt {attempt + 1}/{max_retries})", flush=True)
+            resp = requests.get(url, headers=HEADERS, timeout=timeout)
+            resp.raise_for_status()
+            tables = extract_tables(resp.text)
+            print(f"[scrape] season={season} tables={len(tables)}", flush=True)
+            return {
+                "season": season,
+                "scraped_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+                "source_url": url,
+                "tables": tables,
+            }
+        except requests.exceptions.Timeout:
+            print(f"[scrape] Timeout on attempt {attempt + 1}, retrying...", flush=True)
+            if attempt < max_retries - 1:
+                time.sleep(2)  # Wait 2 seconds before retrying
+            else:
+                raise
+        except requests.exceptions.RequestException as e:
+            print(f"[scrape] Request failed: {e}", flush=True)
+            raise
 
 
 def main() -> int:

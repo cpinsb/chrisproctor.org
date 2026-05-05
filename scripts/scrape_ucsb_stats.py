@@ -149,34 +149,36 @@ def get_bigwest_standing(season: str) -> dict:
             browser.close()
 
         soup = BeautifulSoup(html, "html.parser")
-        text = soup.get_text()
 
-        # Look for UCSB in the standings and extract their rank
-        # Pattern: look for UCSB and a nearby number that represents their standing
-        ucsb_patterns = [
-            r'(\d+)(?:st|nd|rd|th)?\s+.*?(?:UCSB|Santa Barbara)',
-            r'(?:UCSB|Santa Barbara).*?(\d+)(?:st|nd|rd|th)?',
-            r'(\d+)\s+.*?UCSB',
-        ]
+        # Find the standings table and count rows to determine UCSB's rank
+        rank = 0
+        row_count = 0
+        for row in soup.find_all('tr'):
+            row_text = row.get_text().strip()
+            # Skip header rows and empty rows
+            if not row_text or 'School' in row_text or 'Conf' in row_text:
+                continue
 
-        for pattern in ucsb_patterns:
-            match = re.search(pattern, text, re.IGNORECASE | re.DOTALL)
-            if match:
-                rank = int(match.group(1))
-                if 1 <= rank <= 12:
-                    # Proper ordinal suffix
-                    if rank % 100 in (11, 12, 13):
-                        suffix = 'th'
-                    elif rank % 10 == 1:
-                        suffix = 'st'
-                    elif rank % 10 == 2:
-                        suffix = 'nd'
-                    elif rank % 10 == 3:
-                        suffix = 'rd'
-                    else:
-                        suffix = 'th'
-                    print(f"[scrape] found UCSB standing from Big West page: {rank}{suffix}", flush=True)
-                    return {'league_standing': f"{rank}{suffix}"}
+            row_count += 1
+            # Check if this row is UCSB
+            if 'UC Santa Barbara' in row_text or 'UCSB' in row_text:
+                rank = row_count
+                break
+
+        if rank > 0 and 1 <= rank <= 12:
+            # Proper ordinal suffix
+            if rank % 100 in (11, 12, 13):
+                suffix = 'th'
+            elif rank % 10 == 1:
+                suffix = 'st'
+            elif rank % 10 == 2:
+                suffix = 'nd'
+            elif rank % 10 == 3:
+                suffix = 'rd'
+            else:
+                suffix = 'th'
+            print(f"[scrape] found UCSB standing from Big West page: {rank}{suffix}", flush=True)
+            return {'league_standing': f"{rank}{suffix}"}
 
         print(f"[scrape] could not find UCSB standing on Big West page", flush=True)
         return {}

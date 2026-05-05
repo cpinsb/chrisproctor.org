@@ -128,39 +128,61 @@ def extract_records(html: str) -> dict:
             print(f"[scrape] found record pair: overall={overall_w}-{overall_l}, league={league_w}-{league_l}", flush=True)
             break
 
-    # Try to find standing (more flexible)
-    standing_patterns = [
-        r'(?:standing|rank|place)[:\s]*(\d+)(?:st|nd|rd|th)?',
-        r'(\d+)(?:st|nd|rd|th)\s+(?:place|standing|in\s+(?:big\s+)?west)',
-        r'Big\s+West[^0-9]*(\d+)(?:st|nd|rd|th)?',
-        r'(?:standings?|ranking)[^0-9]*(\d+)(?:st|nd|rd|th)?',
-    ]
-    for pattern in standing_patterns:
-        match = re.search(pattern, text, re.IGNORECASE)
-        if match:
-            rank = int(match.group(1))
-            if 1 <= rank <= 12:  # Big West has ~10-12 teams
-                # Proper ordinal suffix
-                if rank % 100 in (11, 12, 13):
-                    suffix = 'th'
-                elif rank % 10 == 1:
-                    suffix = 'st'
-                elif rank % 10 == 2:
-                    suffix = 'nd'
-                elif rank % 10 == 3:
-                    suffix = 'rd'
-                else:
-                    suffix = 'th'
-                records['league_standing'] = f"{rank}{suffix}"
-                print(f"[scrape] found standing: {rank}{suffix}", flush=True)
-                break
-
     if records:
         print(f"[scrape] extracted records: {records}", flush=True)
     else:
         print(f"[scrape] no records found in page text", flush=True)
 
     return records
+
+
+def get_bigwest_standing(season: str) -> dict:
+    """Fetch UCSB's Big West standing from the official Big West standings page."""
+    standings_url = "https://bigwest.org/standings.aspx?path=baseball"
+    try:
+        print(f"[scrape] GET {standings_url} for Big West standing", flush=True)
+        with sync_playwright() as p:
+            browser = p.chromium.launch(headless=True, args=["--no-sandbox"])
+            page = browser.new_page(user_agent=HEADERS["User-Agent"])
+            page.goto(standings_url, timeout=60000, wait_until="networkidle")
+            html = page.content()
+            browser.close()
+
+        soup = BeautifulSoup(html, "html.parser")
+        text = soup.get_text()
+
+        # Look for UCSB in the standings and extract their rank
+        # Pattern: look for UCSB and a nearby number that represents their standing
+        ucsb_patterns = [
+            r'(\d+)(?:st|nd|rd|th)?\s+.*?(?:UCSB|Santa Barbara)',
+            r'(?:UCSB|Santa Barbara).*?(\d+)(?:st|nd|rd|th)?',
+            r'(\d+)\s+.*?UCSB',
+        ]
+
+        for pattern in ucsb_patterns:
+            match = re.search(pattern, text, re.IGNORECASE | re.DOTALL)
+            if match:
+                rank = int(match.group(1))
+                if 1 <= rank <= 12:
+                    # Proper ordinal suffix
+                    if rank % 100 in (11, 12, 13):
+                        suffix = 'th'
+                    elif rank % 10 == 1:
+                        suffix = 'st'
+                    elif rank % 10 == 2:
+                        suffix = 'nd'
+                    elif rank % 10 == 3:
+                        suffix = 'rd'
+                    else:
+                        suffix = 'th'
+                    print(f"[scrape] found UCSB standing from Big West page: {rank}{suffix}", flush=True)
+                    return {'league_standing': f"{rank}{suffix}"}
+
+        print(f"[scrape] could not find UCSB standing on Big West page", flush=True)
+        return {}
+    except Exception as e:
+        print(f"[scrape] Failed to fetch Big West standings: {e}", flush=True)
+        return {}
 
 
 def scrape_season(season: str) -> dict:
@@ -175,24 +197,16 @@ def scrape_season(season: str) -> dict:
                 page = browser.new_page(user_agent=HEADERS["User-Agent"])
                 page.goto(url, timeout=60000, wait_until="networkidle")
                 html = page.content()
-
-                # Also try to get records from the main team page
-                team_url = f"https://ucsbgauchos.com/sports/baseball/"
-                try:
-                    print(f"[scrape] GET {team_url} for records", flush=True)
-                    page.goto(team_url, timeout=60000, wait_until="networkidle")
-                    team_html = page.content()
-                except Exception as e:
-                    print(f"[scrape] Failed to fetch team page: {e}", flush=True)
-                    team_html = ""
-
                 browser.close()
 
             tables = extract_tables(html)
-            # Try to extract records from stats page first, then team page as fallback
+            # Extract records (overall and Big West W-L) from UCSB stats page
             records = extract_records(html)
-            if not records and team_html:
-                records = extract_records(team_html)
+
+            # Get standing from Big West official standings page
+            bw_standing = get_bigwest_standing(season)
+            records.update(bw_standing)
+
             print(f"[scrape] season={season} tables={len(tables)} records={records}", flush=True)
 
             result = {

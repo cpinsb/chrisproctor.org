@@ -96,6 +96,67 @@ def extract_tables(html: str) -> list[dict]:
     return tables
 
 
+def extract_records(html: str) -> dict:
+    """Try to extract overall record, league record, and standing from the page."""
+    soup = BeautifulSoup(html, "html.parser")
+    records = {}
+    text = soup.get_text()
+
+    # Try multiple patterns for overall record
+    # Patterns: "27-12", "27–12", "Overall: 27-12", etc.
+    overall_patterns = [
+        r'Overall\s*[:\-]?\s*(\d+)[–\-](\d+)',
+        r'Record\s*[:\-]?\s*(\d+)[–\-](\d+)',
+        r'(\d+)[–\-](\d+)\s*(?:overall|record)',
+    ]
+    for pattern in overall_patterns:
+        match = re.search(pattern, text, re.IGNORECASE)
+        if match:
+            records['record_overall'] = f"{match.group(1)}-{match.group(2)}"
+            break
+
+    # Try multiple patterns for Big West record
+    bw_patterns = [
+        r'Big\s+West\s*[:\-]?\s*(\d+)[–\-](\d+)',
+        r'Conference\s*[:\-]?\s*(\d+)[–\-](\d+)',
+        r'(\d+)[–\-](\d+)\s*(?:big\s+west|conference)',
+    ]
+    for pattern in bw_patterns:
+        match = re.search(pattern, text, re.IGNORECASE)
+        if match:
+            records['record_league'] = f"{match.group(1)}-{match.group(2)}"
+            break
+
+    # Try to find standing (more flexible)
+    standing_patterns = [
+        r'(\d+)(?:st|nd|rd|th)\s+(?:place|standing)',
+        r'Standing\s*[:\-]?\s*(\d+)(?:st|nd|rd|th)?',
+        r'Rank\s*[:\-]?\s*(\d+)(?:st|nd|rd|th)?',
+    ]
+    for pattern in standing_patterns:
+        match = re.search(pattern, text, re.IGNORECASE)
+        if match:
+            rank = int(match.group(1))
+            # Proper ordinal suffix
+            if rank % 100 in (11, 12, 13):
+                suffix = 'th'
+            elif rank % 10 == 1:
+                suffix = 'st'
+            elif rank % 10 == 2:
+                suffix = 'nd'
+            elif rank % 10 == 3:
+                suffix = 'rd'
+            else:
+                suffix = 'th'
+            records['league_standing'] = f"{rank}{suffix}"
+            break
+
+    if records:
+        print(f"[scrape] extracted records: {records}", flush=True)
+
+    return records
+
+
 def scrape_season(season: str) -> dict:
     url = f"{BASE_URL}/{season}"
     max_retries = 3
@@ -111,13 +172,18 @@ def scrape_season(season: str) -> dict:
                 browser.close()
 
             tables = extract_tables(html)
+            records = extract_records(html)
             print(f"[scrape] season={season} tables={len(tables)}", flush=True)
-            return {
+
+            result = {
                 "season": season,
                 "scraped_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
                 "source_url": url,
                 "tables": tables,
             }
+            # Add records if found
+            result.update(records)
+            return result
         except Exception as e:
             print(f"[scrape] Attempt {attempt + 1} failed: {e}", flush=True)
             if attempt < max_retries - 1:

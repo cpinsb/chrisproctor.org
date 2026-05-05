@@ -63,7 +63,9 @@ def find_heading(table) -> str:
 def extract_tables(html: str) -> list[dict]:
     soup = BeautifulSoup(html, "html.parser")
     tables = []
+    table_count = 0
     for t in soup.find_all("table"):
+        table_count += 1
         # headers: prefer thead th, fall back to first row th
         header_cells = t.select("thead th")
         if not header_cells:
@@ -72,23 +74,43 @@ def extract_tables(html: str) -> list[dict]:
                 header_cells = first_row.find_all(["th", "td"])
         headers = [c.get_text(" ", strip=True) for c in header_cells]
         if len(headers) < 3:
+            print(f"[scrape] table {table_count}: skipped (only {len(headers)} headers)", flush=True)
             continue
 
         body_rows = t.select("tbody tr") or t.find_all("tr")[1:]
         rows = []
         for tr in body_rows:
-            cells = [c.get_text(" ", strip=True) for c in tr.find_all(["td", "th"])]
+            cells = []
+            for i, c in enumerate(tr.find_all(["td", "th"])):
+                text = c.get_text(" ", strip=True)
+                # For player name columns (typically column 1), clean up duplicates and extra info
+                # This happens when the cell contains both a number and a name element
+                if i == 1 and text:
+                    # Remove duplicate consecutive words (e.g., "Flora, Jackson 2 Flora, Jackson" -> "Flora, Jackson")
+                    parts = text.split()
+                    seen = set()
+                    cleaned = []
+                    for part in parts:
+                        # Skip pure numbers and duplicates
+                        if not part.isdigit() and part not in seen:
+                            cleaned.append(part)
+                            seen.add(part)
+                    text = " ".join(cleaned)
+                cells.append(text)
             if len(cells) != len(headers):
                 continue
             if not any(cells):
                 continue
             rows.append(cells)
         if not rows:
+            print(f"[scrape] table {table_count}: skipped (no data rows)", flush=True)
             continue
 
+        heading = find_heading(t)
+        print(f"[scrape] table {table_count}: {heading} - {len(headers)} headers, {len(rows)} rows", flush=True)
         tables.append(
             {
-                "heading": find_heading(t),
+                "heading": heading,
                 "headers": headers,
                 "rows": rows,
             }

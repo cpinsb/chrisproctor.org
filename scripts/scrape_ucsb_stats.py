@@ -37,6 +37,79 @@ HEADERS = {
 }
 
 
+_NAME_RE = re.compile(r"[A-Za-zÀ-ÖØ-öø-ÿ'’.\-]+,\s*[A-Za-zÀ-ÖØ-öø-ÿ'’.\-]+")
+
+
+def _looks_like_name(s: str) -> bool:
+    """A real player name has letters and a comma (Last, First)."""
+    if not s:
+        return False
+    s = s.strip()
+    if len(s) < 3:
+        return False
+    if not any(ch.isalpha() for ch in s):
+        return False
+    return bool(_NAME_RE.search(s))
+
+
+def _clean_name_text(text: str) -> str:
+    """Remove duplicates, jersey numbers, and stray symbols (e.g. '@')
+    from a raw text blob extracted from a player cell."""
+    if not text:
+        return ""
+    parts = text.split()
+    seen = set()
+    cleaned = []
+    for part in parts:
+        # Skip pure numbers, single non-letter symbols ('@', '|', etc.),
+        # and duplicates.
+        if part.isdigit():
+            continue
+        if not any(ch.isalpha() for ch in part):
+            continue
+        key = part.lower()
+        if key in seen:
+            continue
+        cleaned.append(part)
+        seen.add(key)
+    return " ".join(cleaned)
+
+
+def _extract_player_name(cell, fallback_text: str = "") -> str:
+    """Pull the player name out of a stats-table cell.
+
+    UCSB's stats page wraps the player in an <a> link that contains the
+    "Lastname, Firstname" text. The cell can also include social-handle
+    icons ('@'), a duplicated jersey number + name, or a "View Bio"
+    button — all of which we want to discard.
+    """
+    # 1) Prefer an <a> tag whose text already looks like a name.
+    for a in cell.find_all("a"):
+        a_text = a.get_text(" ", strip=True)
+        if _looks_like_name(a_text):
+            return _clean_name_text(a_text)
+    # 2) Otherwise, look at the longest <a> link text that isn't "View Bio".
+    link_texts = [
+        a.get_text(" ", strip=True)
+        for a in cell.find_all("a")
+        if a.get_text(strip=True) and a.get_text(strip=True).lower() != "view bio"
+    ]
+    if link_texts:
+        best = max(link_texts, key=len)
+        cleaned = _clean_name_text(best)
+        if cleaned:
+            return cleaned
+    # 3) Fall back to scrubbing the raw text. If the result still doesn't
+    #    look like a name, try a regex match against the original text.
+    cleaned = _clean_name_text(fallback_text)
+    if _looks_like_name(cleaned):
+        return cleaned
+    m = _NAME_RE.search(fallback_text or "")
+    if m:
+        return m.group(0)
+    return cleaned
+
+
 def find_heading(table) -> str:
     """Walk backward from the table to find the nearest heading-ish text."""
     # caption inside the table
@@ -77,25 +150,27 @@ def extract_tables(html: str) -> list[dict]:
             print(f"[scrape] table {table_count}: skipped (only {len(headers)} headers)", flush=True)
             continue
 
+        # Determine if this is a stats table whose column 1 is the player name.
+        # Stats tables have a "Player" header at index 1; game-by-game / team
+        # high tables do not, and their column 1 should be left alone.
+        player_col_is_name = (
+            len(headers) > 1 and headers[1].strip().lower() in ("player", "name")
+        )
+
         body_rows = t.select("tbody tr") or t.find_all("tr")[1:]
         rows = []
         for tr in body_rows:
+            cell_tags = tr.find_all(["td", "th"])
             cells = []
-            for i, c in enumerate(tr.find_all(["td", "th"])):
+            for i, c in enumerate(cell_tags):
                 text = c.get_text(" ", strip=True)
-                # For player name columns (typically column 1), clean up duplicates and extra info
-                # This happens when the cell contains both a number and a name element
-                if i == 1 and text:
-                    # Remove duplicate consecutive words (e.g., "Flora, Jackson 2 Flora, Jackson" -> "Flora, Jackson")
-                    parts = text.split()
-                    seen = set()
-                    cleaned = []
-                    for part in parts:
-                        # Skip pure numbers and duplicates
-                        if not part.isdigit() and part not in seen:
-                            cleaned.append(part)
-                            seen.add(part)
-                    text = " ".join(cleaned)
+                # For player-name columns, prefer the actual <a> link text
+                # (which contains "Lastname, Firstname"), and fall back to
+                # cleaning the raw text. The UCSB stats page sometimes wraps
+                # the cell in icons / social handles ("@") and a duplicated
+                # number+name pair, both of which should be discarded.
+                if player_col_is_name and i == 1:
+                    text = _extract_player_name(c, fallback_text=text)
                 cells.append(text)
             if len(cells) != len(headers):
                 continue

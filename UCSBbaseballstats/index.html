@@ -837,6 +837,30 @@
     return 1;
   }
 
+  // Detect when a cell value isn't actually a player name (just '@',
+  // a number, a stray symbol, etc.). Used to scrub bad scrapes so the
+  // table never renders a row labeled "@".
+  const NAME_RE = /[A-Za-zÀ-ÖØ-öø-ÿ'’.\-]+,\s*[A-Za-zÀ-ÖØ-öø-ÿ'’.\-]+/;
+  function looksLikeName(s) {
+    if (!s) return false;
+    const t = String(s).trim();
+    if (t.length < 3) return false;
+    if (!/[A-Za-z]/.test(t)) return false;
+    return NAME_RE.test(t);
+  }
+  function sanitizeName(s) {
+    const t = String(s || '').trim();
+    // Always prefer the "Last, First" substring if one is present —
+    // this way "@ Nunez, Corey" or "16 Nunez, Corey 16 Nunez, Corey"
+    // both render as "Nunez, Corey".
+    const m = t.match(NAME_RE);
+    if (m) return m[0];
+    // Strip lone symbols / numbers ('@', '|', '16') so we render blank
+    // rather than an obviously-wrong glyph.
+    if (!/[A-Za-z]{2,}/.test(t)) return '';
+    return t;
+  }
+
   function findNumberCol(headers) {
     const normed = headers.map(norm);
     for (const c of ['#','NO','NUM','JERSEY']) {
@@ -861,7 +885,9 @@
     const playerIdx = findPlayerCol(headers);
     const numIdx = findNumberCol(headers);
     const num = numIdx >= 0 ? (cells[numIdx] || '') : '';
-    const name = cells[playerIdx] || '';
+    // Sanitize so a stray '@' / single symbol / lone number can never
+    // render in place of the player name.
+    const name = sanitizeName(cells[playerIdx]);
     const totals = opts.totals;
 
     let firstCell;
@@ -884,11 +910,14 @@
     const tbody = document.getElementById(bodyId);
     if (!tbody) return null;
 
+    const playerIdx = findPlayerCol(table.headers);
     const playerRows = [];
     let totalsRow = null;
     for (const cells of table.rows) {
-      if (isTotalsRow(cells)) totalsRow = cells;
-      else playerRows.push(cells);
+      if (isTotalsRow(cells)) { totalsRow = cells; continue; }
+      // Drop rows whose player cell isn't actually a name (e.g. just '@').
+      if (!sanitizeName(cells[playerIdx])) continue;
+      playerRows.push(cells);
     }
 
     const html = playerRows.map(c => renderRow(c, table.headers, wantedCols)).join('') +

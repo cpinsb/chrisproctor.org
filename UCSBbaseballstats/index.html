@@ -1230,16 +1230,23 @@
     }
     var ipIdx = colIdx(function(h) { return h === 'IP'; });
 
-    // Primary: get team games from the hitting table's GP-GS totals — always reliable.
-    var teamGames = getTeamGames(document.getElementById('hitting-table'));
+    // Primary: read team games from the record badge already on the page.
+    // It shows e.g. "27–12" (static) or "31–15" (after live data loads).
+    var teamGames = 0;
+    var badge = document.getElementById('record-overall');
+    if (badge) {
+      var rec = badge.textContent.trim().replace(/[–—]/g, '-');
+      var recParts = rec.split('-');
+      if (recParts.length >= 2) teamGames = (parseInt(recParts[0]) || 0) + (parseInt(recParts[1]) || 0);
+    }
 
-    // Fallback: derive from pitching W-L totals (wins + losses = total games played).
+    // Fallback: derive from pitching W-L totals row if badge not available.
     if (teamGames <= 0) {
       var wlIdx = colIdx(function(h) { return /^W-?L/i.test(h); });
       var totalsRow = tableEl.querySelector('tbody tr.totals-row');
       if (totalsRow && wlIdx >= 0) {
         var tcells = Array.from(totalsRow.querySelectorAll('td'));
-        var wlStr  = (tcells[wlIdx] ? tcells[wlIdx].textContent : '').trim();
+        var wlStr  = (tcells[wlIdx] ? tcells[wlIdx].textContent : '').trim().replace(/[–—]/g, '-');
         var parts  = wlStr.split('-');
         if (parts.length >= 2) teamGames = (parseInt(parts[0]) || 0) + (parseInt(parts[1]) || 0);
       }

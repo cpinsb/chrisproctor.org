@@ -240,7 +240,7 @@
     font-size: 0.78rem;
   }
   td.left { text-align: left; font-family: 'DM Sans', sans-serif; }
-  .num { color: var(--mid-gray); font-size: 0.7rem; margin-right: 2px; }
+  .num { color: #555; font-size: 0.7rem; padding-right: 7px; margin-right: 7px; border-right: 1.5px solid var(--light-gray); }
   .player-name {
     font-weight: 600;
     color: var(--dark);
@@ -429,6 +429,7 @@
     a[href]:after { content: none !important; }
     #pitching { page-break-before: always; margin-top: 0; padding-top: 8px; }
     td.left { font-size: 0.73rem; }
+    .num { color: #222 !important; border-right: 1px solid #bbb !important; }
   }
   @media (max-width: 640px) {
     .header-inner { padding: 30px 16px 14px; flex-wrap: wrap; }

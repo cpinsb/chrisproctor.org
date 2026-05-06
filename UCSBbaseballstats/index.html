@@ -248,6 +248,11 @@
   }
   .highlight { color: var(--navy); font-weight: 600; }
   .gold-stat { color: var(--gold-dark); font-weight: 700; }
+  /* Sortable column headers */
+  thead th.sortable { cursor: pointer; user-select: none; }
+  thead th.sortable:hover { background: rgba(255,255,255,0.10); }
+  thead th.sort-active { color: var(--gold) !important; }
+  .sort-arrow { margin-left: 3px; font-size: 0.65em; opacity: 0.9; }
   .pill {
     display: inline-block;
     padding: 2px 7px;
@@ -1028,10 +1033,12 @@
       if (hittingTable) {
         const totals = renderBody(hittingTable, HITTING_COLS, 'hitting-body');
         updateHittingStrip(hittingTable.headers, totals);
+        rehitSort(); // re-apply sort after live rows replace static rows
       }
       if (pitchingTable) {
         const totals = renderBody(pitchingTable, PITCHING_COLS, 'pitching-body');
         updatePitchingStrip(pitchingTable.headers, totals);
+        repitchSort(); // re-apply sort after live rows replace static rows
       }
       // Records come from the team page / Big West standings (set by the scraper).
       applyRecordsFromData(data);
@@ -1056,6 +1063,87 @@
       console.warn('Live stats unavailable, showing demo data.', e);
     }
   }
+
+  // ────── Sortable columns ──────
+  function getSortVal(str) {
+    const s = String(str || '').trim();
+    // Handle "X-Y" format (W-L, SB-ATT): sort by the first number
+    const m = s.match(/^(-?\d+\.?\d*)/);
+    if (m) return parseFloat(m[1]);
+    return -Infinity;
+  }
+
+  function initTableSort(tableEl, defaultCol, defaultAsc) {
+    if (!tableEl) return function() {};
+    const ths = Array.from(tableEl.querySelectorAll('thead th'));
+    let sortCol = defaultCol;
+    let sortAsc  = defaultAsc;
+
+    // Tag every th (except the player column at index 0) with its column name
+    ths.forEach(function(th, i) {
+      if (i === 0) return;
+      th.dataset.sortCol = th.textContent.trim();
+      th.classList.add('sortable');
+    });
+
+    function updateArrows() {
+      ths.forEach(function(th) {
+        th.classList.remove('sort-active');
+        var old = th.querySelector('.sort-arrow');
+        if (old) old.remove();
+        if (th.dataset.sortCol === sortCol) {
+          th.classList.add('sort-active');
+          var sp = document.createElement('span');
+          sp.className = 'sort-arrow';
+          sp.textContent = sortAsc ? ' ▲' : ' ▼';
+          th.appendChild(sp);
+        }
+      });
+    }
+
+    function doSort() {
+      var tbody = tableEl.querySelector('tbody');
+      if (!tbody) return;
+      var allRows = Array.from(tbody.querySelectorAll('tr'));
+      var totalsRow   = allRows.find(function(r) { return r.classList.contains('totals-row'); });
+      var playerRows  = allRows.filter(function(r) { return !r.classList.contains('totals-row'); });
+
+      var colIdx = ths.findIndex(function(th) { return th.dataset.sortCol === sortCol; });
+      if (colIdx >= 0) {
+        playerRows.sort(function(a, b) {
+          var ac = Array.from(a.querySelectorAll('td'));
+          var bc = Array.from(b.querySelectorAll('td'));
+          var av = getSortVal(ac[colIdx] ? ac[colIdx].textContent : '');
+          var bv = getSortVal(bc[colIdx] ? bc[colIdx].textContent : '');
+          return sortAsc ? av - bv : bv - av;
+        });
+      }
+      playerRows.forEach(function(r) { tbody.appendChild(r); });
+      if (totalsRow) tbody.appendChild(totalsRow);
+      updateArrows();
+    }
+
+    // Wire click handlers
+    ths.forEach(function(th) {
+      if (!th.dataset.sortCol) return;
+      th.addEventListener('click', function() {
+        var col = th.dataset.sortCol;
+        if (sortCol === col) {
+          sortAsc = !sortAsc;
+        } else {
+          sortCol = col;
+          sortAsc = false; // default descending when switching to a new column
+        }
+        doSort();
+      });
+    });
+
+    doSort();
+    return doSort; // expose so live-data refresh can re-sort
+  }
+
+  var rehitSort   = function() {};
+  var repitchSort = function() {};
 
   // ────── Statistical Leaders ──────
   const HITTING_LEADER_CONFIGS = [
@@ -1122,6 +1210,10 @@
 
   // Compute leaders from static data immediately, then again after live data loads
   refreshLeaders();
+  // Initialize sortable columns on both tables (works on static fallback data too).
+  // rehitSort / repitchSort are called again inside loadLiveStats after live rows load.
+  rehitSort   = initTableSort(document.getElementById('hitting-table'),  'AVG', false); // AVG descending
+  repitchSort = initTableSort(document.getElementById('pitching-table'), 'ERA', true);  // ERA ascending
   loadLiveStats();
 </script>
 </body>

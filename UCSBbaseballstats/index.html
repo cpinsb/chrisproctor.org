@@ -669,8 +669,9 @@
   </div>
   <div class="section-header">
     <div class="section-title">Pitching Statistics</div>
-    <div class="section-sub" id="pitching-sub">All Games — Sorted by IP</div>
+    <div class="section-sub" id="pitching-sub">All Games — Sorted by ERA</div>
   </div>
+  <p class="qual-note">A darker background denotes not meeting the minimum requirement of <span class="qual-hl">1 IP/G</span></p>
   <div class="table-wrap">
     <table id="pitching-table">
       <thead>
@@ -1054,7 +1055,8 @@
       if (pitchingTable) {
         const totals = renderBody(pitchingTable, PITCHING_COLS, 'pitching-body');
         updatePitchingStrip(pitchingTable.headers, totals);
-        repitchSort(); // re-apply sort after live rows replace static rows
+        markQualifiedPitchers(document.getElementById('pitching-table')); // mark before sort
+        repitchSort();
       }
       // Records come from the team page / Big West standings (set by the scraper).
       applyRecordsFromData(data);
@@ -1210,6 +1212,37 @@
     });
   }
 
+  function markQualifiedPitchers(tableEl) {
+    if (!tableEl) return;
+    var ths = Array.from(tableEl.querySelectorAll('thead th'));
+    function colIdx(test) {
+      return ths.findIndex(function(th) { return test(th.dataset.sortCol || th.textContent.trim().replace(/[▲▼]/g,'').trim()); });
+    }
+    var wlIdx = colIdx(function(h) { return /^W-?L/i.test(h); });
+    var ipIdx = colIdx(function(h) { return h === 'IP'; });
+
+    // Derive team games from the W-L totals row (wins + losses = total games played)
+    var teamGames = 0;
+    var totalsRow = tableEl.querySelector('tbody tr.totals-row');
+    if (totalsRow && wlIdx >= 0) {
+      var tcells = Array.from(totalsRow.querySelectorAll('td'));
+      var wlStr  = (tcells[wlIdx] ? tcells[wlIdx].textContent : '').trim();
+      var parts  = wlStr.split('-');
+      if (parts.length >= 2) teamGames = (parseInt(parts[0]) || 0) + (parseInt(parts[1]) || 0);
+    }
+
+    Array.from(tableEl.querySelectorAll('tbody tr:not(.totals-row)')).forEach(function(row) {
+      var cells = Array.from(row.querySelectorAll('td'));
+      var ipStr = (cells[ipIdx] ? cells[ipIdx].textContent : '').trim();
+      // Parse "X.Y" IP notation: .1 = 1/3 inning, .2 = 2/3 inning
+      var ipParts = ipStr.split('.');
+      var ip = (parseInt(ipParts[0]) || 0) + ((parseInt(ipParts[1]) || 0) / 3);
+      var qualified = teamGames > 0 ? (ip / teamGames >= 1) : ip >= 1;
+      row.dataset.qualified = qualified ? 'true' : 'false';
+      row.classList.toggle('non-qual', !qualified);
+    });
+  }
+
   // ────── Statistical Leaders ──────
   const HITTING_LEADER_CONFIGS = [
     { col: 'AVG',  label: 'Batting Average', lower: false, minCol: 'AB', minVal: 50 },
@@ -1270,15 +1303,16 @@
   }
 
   function refreshLeaders() {
-    // Mark qualification before computing leaders so the filter is current
+    // Mark qualification on both tables before computing leaders
     markQualifiedRows(document.getElementById('hitting-table'));
+    markQualifiedPitchers(document.getElementById('pitching-table'));
     computeAndRenderLeaders('hitting-table',  'hitting-leaders',  'hitting-leaders-cards',  HITTING_LEADER_CONFIGS,  true);
-    computeAndRenderLeaders('pitching-table', 'pitching-leaders', 'pitching-leaders-cards', PITCHING_LEADER_CONFIGS, false);
+    computeAndRenderLeaders('pitching-table', 'pitching-leaders', 'pitching-leaders-cards', PITCHING_LEADER_CONFIGS, true);
   }
 
-  // Mark qualification on static rows first, then compute leaders and sort.
-  // (refreshLeaders also calls markQualifiedRows, so leaders only count qualified players.)
+  // Mark qualification on both tables before sorting and computing leaders.
   markQualifiedRows(document.getElementById('hitting-table'));
+  markQualifiedPitchers(document.getElementById('pitching-table'));
   refreshLeaders();
   // Initialize sortable columns — qualified rows float to the top of each sort group.
   rehitSort   = initTableSort(document.getElementById('hitting-table'),  'AVG', false); // AVG descending

@@ -400,86 +400,93 @@
     border-color: var(--gold);
   }
   /* PRINT STYLES */
-  @page { size: landscape; margin: 0.5in; }
+  @page { size: landscape; margin: 0.3in; }
   @media print {
     body { background: white; }
     .header-stripe, .home-link, .tab-nav,
     .stats-strip, footer, .print-btn { display: none !important; }
-    .leaders-section { display: block !important; page-break-inside: avoid; }
+    .leaders-section { display: block !important; }
+
+    /* ── Compact header: single row, no wasted space ── */
     header {
       background: white !important;
       color: black !important;
       border-bottom: 2px solid #003660;
-      padding-bottom: 10px;
+      padding: 4px 0 5px !important;
     }
-    .logo-mark { background: #003660 !important; }
-    .header-text h1 { color: #003660 !important; }
+    .header-inner { padding: 0 !important; gap: 10px !important; align-items: center; }
+    .logo-mark {
+      width: 32px !important; height: 32px !important;
+      font-size: 14px !important;
+      background: #003660 !important;
+      box-shadow: none !important;
+      -webkit-print-color-adjust: exact; print-color-adjust: exact;
+    }
+    .header-text h1 { color: #003660 !important; font-size: 1.2rem !important; line-height: 1; }
     .header-text h1 span { color: #003660 !important; }
-    .header-meta { color: #333 !important; }
-    .record-badge { color: #003660 !important; }
-    .record-label { color: #666 !important; }
-    .record-divider { background: #ccc !important; }
-    .page { display: block !important; padding: 8px 16px; }
-    .section-header { margin-bottom: 8px; }
-    .section-title { color: #003660 !important; font-size: 1.2rem; }
-    .section-sub { color: #666 !important; font-size: 0.65rem; }
-    /* Leader section — readable on white background */
+    .header-meta { color: #555 !important; font-size: 0.55rem !important; margin-top: 1px; }
+    .record-stack { gap: 8px !important; }
+    .record-item { min-width: 36px !important; }
+    .record-badge { color: #003660 !important; font-size: 0.95rem !important; }
+    .record-label { color: #666 !important; font-size: 0.5rem !important; }
+    .record-divider { background: #ccc !important; height: 22px !important; }
+
+    /* ── Page / section layout ── */
+    .page { display: block !important; padding: 4px 0 0 !important; }
+    .section-header { margin-bottom: 4px !important; }
+    .section-title { color: #003660 !important; font-size: 0.95rem !important; }
+    .section-sub { color: #666 !important; font-size: 0.58rem !important; }
+
+    /* ── Leader section — compact, readable on white ── */
     .leaders-section {
       background: #f4f7fb !important;
-      border: 2px solid #003660 !important;
-      margin-bottom: 12px;
-      padding: 8px 12px !important;
-      -webkit-print-color-adjust: exact;
-      print-color-adjust: exact;
+      border: 1.5px solid #003660 !important;
+      border-radius: 5px !important;
+      margin-bottom: 5px !important;
+      padding: 4px 8px !important;
+      page-break-inside: avoid;
+      -webkit-print-color-adjust: exact; print-color-adjust: exact;
     }
     .leaders-title {
       color: #003660 !important;
-      font-size: 0.75rem !important;
-      margin-bottom: 6px;
+      font-size: 0.6rem !important;
+      margin-bottom: 3px !important;
       font-weight: 700 !important;
     }
-    .leaders-scroll { gap: 6px; padding-bottom: 2px; flex-wrap: wrap; }
+    .leaders-scroll { gap: 4px !important; padding-bottom: 0 !important; flex-wrap: nowrap !important; overflow: visible !important; }
     .leader-card {
       background: white !important;
-      border: 1.5px solid #003660 !important;
-      border-radius: 5px !important;
-      padding: 5px 10px !important;
-      min-width: 100px;
-      -webkit-print-color-adjust: exact;
-      print-color-adjust: exact;
+      border: 1px solid #003660 !important;
+      border-radius: 4px !important;
+      padding: 3px 7px !important;
+      min-width: 80px !important;
+      flex: 1 !important;
+      -webkit-print-color-adjust: exact; print-color-adjust: exact;
     }
-    .leader-stat-name {
-      color: #856B00 !important;
-      font-size: 0.55rem !important;
-      font-weight: 700 !important;
-    }
-    .leader-player-name {
-      color: #003660 !important;
-      font-size: 0.78rem !important;
-      font-weight: 700 !important;
-    }
-    .leader-value {
-      color: #003660 !important;
-      font-size: 1.1rem !important;
-      font-weight: 700 !important;
-    }
-    .table-wrap { border: 1px solid #ccc; box-shadow: none; page-break-inside: avoid; margin-bottom: 12px; }
-    table { font-size: 0.75rem; }
+    .leader-stat-name { color: #856B00 !important; font-size: 0.48rem !important; font-weight: 700 !important; margin-bottom: 1px !important; }
+    .leader-player-name { color: #003660 !important; font-size: 0.65rem !important; font-weight: 700 !important; margin-bottom: 0 !important; }
+    .leader-value { color: #003660 !important; font-size: 0.9rem !important; font-weight: 700 !important; line-height: 1.1 !important; }
+
+    /* ── Table ── */
+    .table-wrap { border: 1px solid #ccc; box-shadow: none; margin-bottom: 6px; }
+    table { font-size: 0.65rem; }
     thead tr { background: #003660 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-    thead th { color: white !important; padding: 6px 6px !important; font-size: 0.6rem; }
+    thead th { color: white !important; padding: 3px 4px !important; font-size: 0.55rem !important; }
     thead th.key-stat { color: #FEBC11 !important; }
     tbody tr { border-bottom: 0.5px solid #ddd; }
-    tbody td { padding: 5px 6px !important; }
+    tbody td { padding: 2px 4px !important; font-size: 0.63rem !important; }
     tbody tr:nth-child(even) { background: #f9f9f9 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
     tbody tr.totals-row { background: #e8edf2 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
     .gold-stat { color: #856B00 !important; }
     .highlight { color: #003660 !important; }
     a[href]:after { content: none !important; }
-    #pitching { page-break-before: always; margin-top: 0; padding-top: 8px; }
-    td.left { font-size: 0.73rem; }
+    td.left { font-size: 0.63rem !important; }
     .num { color: #222 !important; border-right: 1px solid #bbb !important; }
     tr.non-qual td { background: #d4d0c9 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-    .qual-note { display: block; font-size: 0.65rem; margin-bottom: 6px; }
+    .qual-note { display: block; font-size: 0.55rem !important; margin-bottom: 3px !important; }
+
+    /* ── Page breaks: hitting p.1, pitching p.2 ── */
+    #pitching { page-break-before: always; margin-top: 0; padding-top: 0; }
   }
   @media (max-width: 640px) {
     .header-inner { padding: 30px 16px 14px; flex-wrap: wrap; }

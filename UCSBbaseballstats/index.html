@@ -1228,17 +1228,21 @@
     function colIdx(test) {
       return ths.findIndex(function(th) { return test(th.dataset.sortCol || th.textContent.trim().replace(/[▲▼]/g,'').trim()); });
     }
-    var wlIdx = colIdx(function(h) { return /^W-?L/i.test(h); });
     var ipIdx = colIdx(function(h) { return h === 'IP'; });
 
-    // Derive team games from the W-L totals row (wins + losses = total games played)
-    var teamGames = 0;
-    var totalsRow = tableEl.querySelector('tbody tr.totals-row');
-    if (totalsRow && wlIdx >= 0) {
-      var tcells = Array.from(totalsRow.querySelectorAll('td'));
-      var wlStr  = (tcells[wlIdx] ? tcells[wlIdx].textContent : '').trim();
-      var parts  = wlStr.split('-');
-      if (parts.length >= 2) teamGames = (parseInt(parts[0]) || 0) + (parseInt(parts[1]) || 0);
+    // Primary: get team games from the hitting table's GP-GS totals — always reliable.
+    var teamGames = getTeamGames(document.getElementById('hitting-table'));
+
+    // Fallback: derive from pitching W-L totals (wins + losses = total games played).
+    if (teamGames <= 0) {
+      var wlIdx = colIdx(function(h) { return /^W-?L/i.test(h); });
+      var totalsRow = tableEl.querySelector('tbody tr.totals-row');
+      if (totalsRow && wlIdx >= 0) {
+        var tcells = Array.from(totalsRow.querySelectorAll('td'));
+        var wlStr  = (tcells[wlIdx] ? tcells[wlIdx].textContent : '').trim();
+        var parts  = wlStr.split('-');
+        if (parts.length >= 2) teamGames = (parseInt(parts[0]) || 0) + (parseInt(parts[1]) || 0);
+      }
     }
 
     Array.from(tableEl.querySelectorAll('tbody tr:not(.totals-row)')).forEach(function(row) {
@@ -1247,7 +1251,8 @@
       // Parse "X.Y" IP notation: .1 = 1/3 inning, .2 = 2/3 inning
       var ipParts = ipStr.split('.');
       var ip = (parseInt(ipParts[0]) || 0) + ((parseInt(ipParts[1]) || 0) / 3);
-      var qualified = teamGames > 0 ? (ip / teamGames >= 1) : ip >= 1;
+      // Qualify if total IP >= team games played (= 1 IP per team game)
+      var qualified = teamGames > 0 ? (ip >= teamGames) : false;
       row.dataset.qualified = qualified ? 'true' : 'false';
       row.classList.toggle('non-qual', !qualified);
     });

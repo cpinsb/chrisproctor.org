@@ -400,6 +400,7 @@
     border-color: var(--gold);
   }
   /* PRINT STYLES */
+  @page { size: landscape; margin: 0.5in; }
   @media print {
     body { background: white; }
     .header-stripe, .home-link, .tab-nav,
@@ -422,10 +423,46 @@
     .section-header { margin-bottom: 8px; }
     .section-title { color: #003660 !important; font-size: 1.2rem; }
     .section-sub { color: #666 !important; font-size: 0.65rem; }
-    .leaders-section { margin-bottom: 12px; padding: 8px 12px !important; }
-    .leaders-title { font-size: 0.75rem !important; margin-bottom: 6px; }
-    .leaders-scroll { gap: 6px; padding-bottom: 2px; }
-    .leader-card { padding: 6px 10px !important; min-width: 100px; font-size: 0.7rem; }
+    /* Leader section — readable on white background */
+    .leaders-section {
+      background: #f4f7fb !important;
+      border: 2px solid #003660 !important;
+      margin-bottom: 12px;
+      padding: 8px 12px !important;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    .leaders-title {
+      color: #003660 !important;
+      font-size: 0.75rem !important;
+      margin-bottom: 6px;
+      font-weight: 700 !important;
+    }
+    .leaders-scroll { gap: 6px; padding-bottom: 2px; flex-wrap: wrap; }
+    .leader-card {
+      background: white !important;
+      border: 1.5px solid #003660 !important;
+      border-radius: 5px !important;
+      padding: 5px 10px !important;
+      min-width: 100px;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    .leader-stat-name {
+      color: #856B00 !important;
+      font-size: 0.55rem !important;
+      font-weight: 700 !important;
+    }
+    .leader-player-name {
+      color: #003660 !important;
+      font-size: 0.78rem !important;
+      font-weight: 700 !important;
+    }
+    .leader-value {
+      color: #003660 !important;
+      font-size: 1.1rem !important;
+      font-weight: 700 !important;
+    }
     .table-wrap { border: 1px solid #ccc; box-shadow: none; page-break-inside: avoid; margin-bottom: 12px; }
     table { font-size: 0.75rem; }
     thead tr { background: #003660 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
@@ -1278,7 +1315,7 @@
     { col: 'ERA',  label: 'ERA',        lower: true,  minCol: 'IP', minVal: 10 },
     { col: 'WHIP', label: 'WHIP',       lower: true,  minCol: 'IP', minVal: 10 },
     { col: 'SO',   label: 'Strikeouts', lower: false },
-    { col: 'SV',   label: 'Saves',      lower: false },
+    { col: 'SV',   label: 'Saves',      lower: false, ignoreQual: true },
   ];
 
   function computeAndRenderLeaders(tableId, sectionId, cardsId, configs, qualifiedOnly) {
@@ -1286,12 +1323,14 @@
     if (!table) return;
     const thEls = Array.from(table.querySelectorAll('thead th'));
     const headers = thEls.map(th => th.textContent.trim().replace(/[▲▼]/g,'').trim());
-    const rows = Array.from(table.querySelectorAll('tbody tr:not(.totals-row)'))
-      .filter(r => !qualifiedOnly || r.dataset.qualified !== 'false');
+    const allRows = Array.from(table.querySelectorAll('tbody tr:not(.totals-row)'));
+    const qualRows = allRows.filter(r => r.dataset.qualified !== 'false');
     const leaders = [];
     for (const cfg of configs) {
       const colIdx = headers.indexOf(cfg.col);
       if (colIdx < 0) continue;
+      // ignoreQual: use all rows (e.g. Saves — closers rarely meet IP/G threshold)
+      const rows = (qualifiedOnly && !cfg.ignoreQual) ? qualRows : allRows;
       let bestName = null, bestValStr = '', bestVal = cfg.lower ? Infinity : -Infinity;
       for (const row of rows) {
         const cells = Array.from(row.querySelectorAll('td'));

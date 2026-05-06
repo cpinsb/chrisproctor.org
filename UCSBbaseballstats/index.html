@@ -253,6 +253,17 @@
   thead th.sortable:hover { background: rgba(255,255,255,0.10); }
   thead th.sort-active { color: var(--gold) !important; }
   .sort-arrow { margin-left: 3px; font-size: 0.65em; opacity: 0.9; }
+  /* Qualification filter — darker background for non-qualifying rows */
+  tr.non-qual td { background: #DEDAD4 !important; }
+  .qual-note {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.68rem;
+    color: var(--mid-gray);
+    margin: -4px 0 12px;
+    letter-spacing: 0.2px;
+    font-style: italic;
+  }
+  .qual-note .qual-hl { color: var(--gold-dark); font-weight: 600; font-style: normal; }
   .pill {
     display: inline-block;
     padding: 2px 7px;
@@ -430,6 +441,8 @@
     #pitching { page-break-before: always; margin-top: 0; padding-top: 8px; }
     td.left { font-size: 0.73rem; }
     .num { color: #222 !important; border-right: 1px solid #bbb !important; }
+    tr.non-qual td { background: #d4d0c9 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .qual-note { display: block; font-size: 0.65rem; margin-bottom: 6px; }
   }
   @media (max-width: 640px) {
     .header-inner { padding: 30px 16px 14px; flex-wrap: wrap; }
@@ -494,8 +507,9 @@
   </div>
   <div class="section-header">
     <div class="section-title">Hitting Statistics</div>
-    <div class="section-sub" id="hitting-sub">All Games — Sorted by AB</div>
+    <div class="section-sub" id="hitting-sub">All Games — Sorted by AVG</div>
   </div>
+  <p class="qual-note">A darker background denotes not meeting the minimum requirement of <span class="qual-hl">2 PA/G and 75% of games played</span></p>
   <div class="table-wrap">
     <table id="hitting-table">
       <thead>
@@ -1034,7 +1048,8 @@
       if (hittingTable) {
         const totals = renderBody(hittingTable, HITTING_COLS, 'hitting-body');
         updateHittingStrip(hittingTable.headers, totals);
-        rehitSort(); // re-apply sort after live rows replace static rows
+        markQualifiedRows(document.getElementById('hitting-table')); // mark before sort so groups work
+        rehitSort();
       }
       if (pitchingTable) {
         const totals = renderBody(pitchingTable, PITCHING_COLS, 'pitching-body');
@@ -1106,18 +1121,25 @@
       var tbody = tableEl.querySelector('tbody');
       if (!tbody) return;
       var allRows = Array.from(tbody.querySelectorAll('tr'));
-      var totalsRow   = allRows.find(function(r) { return r.classList.contains('totals-row'); });
-      var playerRows  = allRows.filter(function(r) { return !r.classList.contains('totals-row'); });
+      var totalsRow  = allRows.find(function(r) { return r.classList.contains('totals-row'); });
+      var playerRows = allRows.filter(function(r) { return !r.classList.contains('totals-row'); });
 
       var colIdx = ths.findIndex(function(th) { return th.dataset.sortCol === sortCol; });
       if (colIdx >= 0) {
-        playerRows.sort(function(a, b) {
+        var cmp = function(a, b) {
           var ac = Array.from(a.querySelectorAll('td'));
           var bc = Array.from(b.querySelectorAll('td'));
           var av = getSortVal(ac[colIdx] ? ac[colIdx].textContent : '');
           var bv = getSortVal(bc[colIdx] ? bc[colIdx].textContent : '');
           return sortAsc ? av - bv : bv - av;
-        });
+        };
+        // Split into qualified (or unmarked) vs non-qualified, sort each group separately,
+        // then put qualified group first. Non-qualifying players still rank among themselves.
+        var qualRows    = playerRows.filter(function(r) { return r.dataset.qualified !== 'false'; });
+        var nonQualRows = playerRows.filter(function(r) { return r.dataset.qualified === 'false'; });
+        qualRows.sort(cmp);
+        nonQualRows.sort(cmp);
+        playerRows = qualRows.concat(nonQualRows);
       }
       playerRows.forEach(function(r) { tbody.appendChild(r); });
       if (totalsRow) tbody.appendChild(totalsRow);
@@ -1146,6 +1168,48 @@
   var rehitSort   = function() {};
   var repitchSort = function() {};
 
+  // ────── Qualification filter (2 PA/G & 75% of team games) ──────
+  function getTeamGames(tableEl) {
+    if (!tableEl) return 0;
+    var totalsRow = tableEl.querySelector('tbody tr.totals-row');
+    if (!totalsRow) return 0;
+    var ths = Array.from(tableEl.querySelectorAll('thead th'));
+    var gpIdx = ths.findIndex(function(th) { return /^GP/i.test(th.dataset.sortCol || th.textContent); });
+    if (gpIdx < 0) return 0;
+    var cells = Array.from(totalsRow.querySelectorAll('td'));
+    var gpStr = (cells[gpIdx] ? cells[gpIdx].textContent : '').trim();
+    return parseInt(gpStr.split('-')[0]) || 0;
+  }
+
+  function markQualifiedRows(tableEl) {
+    if (!tableEl) return;
+    var teamGames = getTeamGames(tableEl);
+    var ths = Array.from(tableEl.querySelectorAll('thead th'));
+    function colIdx(test) {
+      return ths.findIndex(function(th) { return test(th.dataset.sortCol || th.textContent.trim()); });
+    }
+    var gpIdx  = colIdx(function(h) { return /^GP/i.test(h); });
+    var abIdx  = colIdx(function(h) { return h === 'AB'; });
+    var bbIdx  = colIdx(function(h) { return h === 'BB'; });
+    var hbpIdx = colIdx(function(h) { return h === 'HBP'; });
+
+    Array.from(tableEl.querySelectorAll('tbody tr:not(.totals-row)')).forEach(function(row) {
+      var cells = Array.from(row.querySelectorAll('td'));
+      var gpStr = (cells[gpIdx] ? cells[gpIdx].textContent : '').trim();
+      var gp  = parseInt(gpStr.split('-')[0]) || 0;
+      var ab  = parseFloat(cells[abIdx]  ? cells[abIdx].textContent  : 0) || 0;
+      var bb  = parseFloat(cells[bbIdx]  ? cells[bbIdx].textContent  : 0) || 0;
+      var hbp = parseFloat(cells[hbpIdx] ? cells[hbpIdx].textContent : 0) || 0;
+      var pa  = ab + bb + hbp;
+      var paPerGame = gp > 0 ? pa / gp : 0;
+      var qualified = teamGames > 0
+        ? (paPerGame >= 2 && gp >= 0.75 * teamGames)
+        : paPerGame >= 2;
+      row.dataset.qualified = qualified ? 'true' : 'false';
+      row.classList.toggle('non-qual', !qualified);
+    });
+  }
+
   // ────── Statistical Leaders ──────
   const HITTING_LEADER_CONFIGS = [
     { col: 'AVG',  label: 'Batting Average', lower: false, minCol: 'AB', minVal: 50 },
@@ -1162,12 +1226,13 @@
     { col: 'SV',   label: 'Saves',      lower: false },
   ];
 
-  function computeAndRenderLeaders(tableId, sectionId, cardsId, configs) {
+  function computeAndRenderLeaders(tableId, sectionId, cardsId, configs, qualifiedOnly) {
     const table = document.getElementById(tableId);
     if (!table) return;
     const thEls = Array.from(table.querySelectorAll('thead th'));
-    const headers = thEls.map(th => th.textContent.trim());
-    const rows = Array.from(table.querySelectorAll('tbody tr:not(.totals-row)'));
+    const headers = thEls.map(th => th.textContent.trim().replace(/[▲▼]/g,'').trim());
+    const rows = Array.from(table.querySelectorAll('tbody tr:not(.totals-row)'))
+      .filter(r => !qualifiedOnly || r.dataset.qualified !== 'false');
     const leaders = [];
     for (const cfg of configs) {
       const colIdx = headers.indexOf(cfg.col);
@@ -1205,14 +1270,17 @@
   }
 
   function refreshLeaders() {
-    computeAndRenderLeaders('hitting-table', 'hitting-leaders', 'hitting-leaders-cards', HITTING_LEADER_CONFIGS);
-    computeAndRenderLeaders('pitching-table', 'pitching-leaders', 'pitching-leaders-cards', PITCHING_LEADER_CONFIGS);
+    // Mark qualification before computing leaders so the filter is current
+    markQualifiedRows(document.getElementById('hitting-table'));
+    computeAndRenderLeaders('hitting-table',  'hitting-leaders',  'hitting-leaders-cards',  HITTING_LEADER_CONFIGS,  true);
+    computeAndRenderLeaders('pitching-table', 'pitching-leaders', 'pitching-leaders-cards', PITCHING_LEADER_CONFIGS, false);
   }
 
-  // Compute leaders from static data immediately, then again after live data loads
+  // Mark qualification on static rows first, then compute leaders and sort.
+  // (refreshLeaders also calls markQualifiedRows, so leaders only count qualified players.)
+  markQualifiedRows(document.getElementById('hitting-table'));
   refreshLeaders();
-  // Initialize sortable columns on both tables (works on static fallback data too).
-  // rehitSort / repitchSort are called again inside loadLiveStats after live rows load.
+  // Initialize sortable columns — qualified rows float to the top of each sort group.
   rehitSort   = initTableSort(document.getElementById('hitting-table'),  'AVG', false); // AVG descending
   repitchSort = initTableSort(document.getElementById('pitching-table'), 'ERA', true);  // ERA ascending
   loadLiveStats();

@@ -1,6 +1,6 @@
 {
   "season": "2026",
-  "scraped_at": "2026-05-20T12:07:53Z",
+  "scraped_at": "2026-05-21T12:35:49Z",
   "source_url": "https://ucsbgauchos.com/sports/baseball/stats/2026",
   "tables": [
     {
@@ -5755,14 +5755,14 @@
         [
           "DOUBLES",
           "2",
-          "Rowan Kelly; Cole Kosciusko; Liam Barrett; Severns, Ryan",
-          "Loyola Marymount (3/3/2026); Saint Mary's (3/10/2026); Pepperdine (5/5/2026); USC (3/31/2026); Cal Poly (04/04/2026)"
+          "Rowan Kelly (2); Cole Kosciusko; Liam Barrett; Severns, Ryan; William Vasseur",
+          "USC (3/31/2026); Saint Mary's (3/10/2026); Pepperdine (5/5/2026); Cal Poly (04/04/2026); CSU Bakersfield (5/1/2026)"
         ],
         [
           "TRIPLES",
           "1",
-          "J. Mendez; Corey Nunez; C. Kosciusko; Colin Beazizoo; Xavier Esquer",
-          "Portland (2/22/2026); Long Beach St. (3/8/2026); Southern Miss. (2/15/2026); UC Davis (3/13/2026); USC (3/31/2026)"
+          "J. Mendez; Corey Nunez (2); C. Kosciusko; Colin Beazizoo; Xavier Esquer",
+          "Portland (2/22/2026); California Baptist (4/20/2026); Southern Miss. (2/15/2026); UC Davis (3/13/2026); USC (3/31/2026)"
         ],
         [
           "HOME RUNS",
@@ -5779,20 +5779,20 @@
         [
           "STRIKEOUTS",
           "3",
-          "Xavier Esquer; Noah Karliner; Karliner",
-          "UC San Diego (4/10/2026); LMU (CA) (2/24/2026); UC Davis (3/14/2026); Cal Poly (4/2/2026); CSU Bakersfield (5/1/2026)"
+          "Xavier Esquer; Noah Karliner (4); Karliner",
+          "UC San Diego (4/10/2026); CSU Bakersfield (5/2/2026); Cal Poly (4/2/2026)"
         ],
         [
           "SAC HITS",
           "2",
-          "Nico Libed; William Vasseur; Corey Nunez",
-          "Oregon (3/28/2026); Cal State Fullerton (4/25/2026); CSU Bakersfield (5/1/2026); CSUN (5/8/2026); CSUN (5/9/2026)"
+          "Nico Libed; William Vasseur (2); Corey Nunez (2)",
+          "Oregon (3/28/2026); CSUN (5/9/2026); CSUN (5/8/2026)"
         ],
         [
           "SAC FLIES",
           "1",
-          "C. Beazizo; W. Vasseur; N. Vargas; Rowan Kelly; Nate Vargas",
-          "Portland (2/22/2026); Utah (2/28/2026); Utah (3/1/2026); USC (4/7/2026); Cal State Fullerton (4/24/2026)"
+          "C. Beazizo; W. Vasseur; N. Vargas; Rowan Kelly (2); Nate Vargas (2)",
+          "Portland (2/22/2026); Utah (2/28/2026); Utah (3/1/2026); UC Irvine (4/19/2026); CSUN (5/8/2026)"
         ],
         [
           "STOLEN BASES",
@@ -5809,8 +5809,8 @@
         [
           "CAUGHT STEALING",
           "1",
-          "R. Kelly; C. Goldstein; M. Stagg; Rowan Kelly; Cole Kosciusko",
-          "Portland (2/20/2026); Portland (2/21/2026); Utah (3/1/2026); Long Beach St. (3/8/2026); Hawaii (3/20/2026)"
+          "R. Kelly; C. Goldstein (2); M. Stagg; Rowan Kelly (3); Cole Kosciusko (3)",
+          "Portland (2/20/2026); Southern Miss. (2/15/2026); Utah (3/1/2026); Pepperdine (5/5/2026); Saint Mary's (3/24/2026)"
         ],
         [
           "HIT INTO DP",
@@ -5832,8 +5832,8 @@
         [
           "INNINGS PITCHED",
           "9.0",
-          "Jackson Flora",
-          "UC Riverside (5/14/2026); Cal Poly (4/2/2026)"
+          "Jackson Flora (2)",
+          "Cal Poly (4/2/2026)"
         ],
         [
           "RUNS ALLOWED",
@@ -5856,8 +5856,8 @@
         [
           "STRIKEOUTS",
           "12",
-          "Jackson Flora",
-          "Hawaii (3/20/2026); UC Riverside (5/14/2026)"
+          "Jackson Flora (2)",
+          "UC Riverside (5/14/2026)"
         ],
         [
           "HITS ALLOWED",
@@ -5874,8 +5874,8 @@
         [
           "TRIPLES ALLOWED",
           "1",
-          "Raymond Olivas; Van Froling; AJ Krodel; Josh Jannicelli; Nathan Aceves",
-          "Saint Mary's (3/10/2026); Oregon (3/29/2026); UC Davis (3/15/2026); USC (3/31/2026); UC Irvine (4/18/2026)"
+          "Raymond Olivas; Van Froling (2); AJ Krodel; Josh Jannicelli; Nathan Aceves",
+          "Saint Mary's (3/10/2026); CSU Bakersfield (5/3/2026); UC Davis (3/15/2026); USC (3/31/2026); UC Irvine (4/18/2026)"
         ],
         [
           "HOME RUNS ALLOWED",
@@ -5927,14 +5927,14 @@
         [
           "PASSED BALLS",
           "1",
-          "N. Vargas; Nate Vargas; Nico Libed",
-          "Utah (2/27/2026); Long Beach St. (3/7/2026); USC (3/31/2026); UC Irvine (4/17/2026); CSU Bakersfield (5/2/2026)"
+          "N. Vargas; Nate Vargas (3); Nico Libed",
+          "Utah (2/27/2026); CSU Bakersfield (5/2/2026); USC (3/31/2026)"
         ],
         [
           "DPS TURNED",
           "2",
-          "Cade Goldstein; Nick Husovsky; Corey Nunez",
-          "Loyola Marymount (3/3/2026); Long Beach St. (3/8/2026); Saint Mary's (3/10/2026); California Baptist (4/20/2026); CSUN (5/9/2026)"
+          "Cade Goldstein; Nick Husovsky (2); Corey Nunez (2)",
+          "Loyola Marymount (3/3/2026); Saint Mary's (3/10/2026); CSUN (5/9/2026)"
         ]
       ]
     },

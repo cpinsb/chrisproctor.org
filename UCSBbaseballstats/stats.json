@@ -1,6 +1,6 @@
 {
   "season": "2026",
-  "scraped_at": "2026-11-17T10:10:37Z",
+  "scraped_at": "2026-11-18T09:43:53Z",
   "source_url": "https://ucsbgauchos.com/sports/baseball/stats/2026",
   "tables": [
     {
@@ -6836,5 +6836,6 @@
     }
   ],
   "record_overall": "40-20",
-  "record_league": "22-8"
+  "record_league": "22-8",
+  "league_standing": "1st"
 }
